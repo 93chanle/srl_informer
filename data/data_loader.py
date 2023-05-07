@@ -275,7 +275,6 @@ class Dataset_Custom(Dataset):
         idx_data = [idx + self.seq_len for idx in idx_seqs] 
         idx_data[0] = 0
         
-        
         # Subset sequences according to data type (train val test)
         self.seqs_x = self.seqs_x[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
         self.seqs_y  = self.seqs_y[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
@@ -357,7 +356,7 @@ class Dataset_Custom(Dataset):
         inc_len=self.seq_len
         dec_len=self.label_len+self.pred_len
         
-        for i in range(len(data)-self.seq_len):
+        for i in range(len(data) - self.seq_len - self.pred_len + 1): # Index purposes (otherwise error)
             enc_seq = data[i:i+inc_len]
             enc_seqs.append(enc_seq)
             

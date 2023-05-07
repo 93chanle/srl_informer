@@ -47,8 +47,8 @@ s_layers:
 - 1
 seq_len: 96
 target: capacity_price
-timestamp: 03-05-2023_02-43-24
+timestamp: 05-05-2023_13-26-47
 train_epochs: 1
 use_amp: false
-use_gpu: true
+use_gpu: false
 use_multi_gpu: false

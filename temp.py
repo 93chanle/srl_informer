@@ -14,7 +14,7 @@ from data.data_loader import Dataset_Custom
 data_set = Dataset_Custom(
             root_path='./data/processed/SRL/',
             data_path='SRL_NEG_00_04.csv',
-            flag='val',
+            flag='test',
             size=[96, 48, 3],
             features='S',
             target='capacity_price',
@@ -23,3 +23,4 @@ data_set = Dataset_Custom(
             freq='d',
             cols=None
         )
+
