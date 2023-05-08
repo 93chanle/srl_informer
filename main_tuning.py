@@ -46,9 +46,9 @@ parser.add_argument('--devices', type=str, default='0,1,2,3',help='device ids of
 parser.add_argument('--activation', type=str, default='gelu',help='activation')
 
 # tuneable
-parser.add_argument('--seq_len', type=int, default=96, help='input sequence length of Informer encoder')
-parser.add_argument('--label_len', type=int, default=48, help='start token length of Informer decoder')
-parser.add_argument('--pred_len', type=int, default=1, help='prediction sequence length')
+parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
+parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
+parser.add_argument('--pred_len', type=int, default=2, help='prediction sequence length')
 # Informer decoder input: concat[start token series(label_len), zero padding series(pred_len)]
 
 parser.add_argument('--enc_in', type=int, default=7, help='encoder input size')

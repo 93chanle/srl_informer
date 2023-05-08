@@ -80,18 +80,21 @@ class Exp_Informer(Exp_Basic):
         
         timeenc = 0 if args.embed!='timeF' else 1
 
-        if flag == 'test':
+        assert flag in ['train', 'val', 'test']
+        if flag in ['test', 'val']:
             shuffle_flag = False; drop_last = False; batch_size = args.batch_size; freq=args.freq
-        elif flag=='pred':
-            shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
-            Data = Dataset_Pred
-        else:
+        # elif flag=='pred':
+        #     shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
+        #     Data = Dataset_Pred
+        elif flag == 'train':
             shuffle_flag = True; drop_last = False; batch_size = args.batch_size; freq=args.freq
+
         data_set = Data(
             root_path=args.root_path,
             data_path=args.data_path,
             flag=flag,
             size=[args.seq_len, args.label_len, args.pred_len],
+            scale=args.scale,
             features=args.features,
             target=args.target,
             inverse=args.inverse,
@@ -294,7 +297,6 @@ class Exp_Informer(Exp_Basic):
             os.makedirs(folder_path)
 
         mae, mse, rmse, mape, mspe = metric(preds, trues)
-        # print('mse:{}, mae:{}'.format(mse, mae))
 
         # Save prediction
         np.save(folder_path+'metrics.npy', np.array([mae, mse, rmse, mape, mspe]))

@@ -17,15 +17,17 @@ def args_parsing():
     parser.add_argument('--timestamp', type=str, default=now)
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--root_path', type=str, default='./data/processed/SRL/', help='root path of the data file')
-    parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04.csv', help='data file')    
+    parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04_dummy.csv', help='data file')    
     parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
+    
+    parser.add_argument('--scale', type=str, default='standard', help='forecasting task, options:[standard, minmax, none]')
     parser.add_argument('--target', type=str, default='capacity_price', help='target feature in S or MS task')
     parser.add_argument('--freq', type=str, default='d', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 
-    parser.add_argument('--seq_len', type=int, default=96, help='input sequence length of Informer encoder')
-    parser.add_argument('--label_len', type=int, default=48, help='start token length of Informer decoder')
-    parser.add_argument('--pred_len', type=int, default=3, help='prediction sequence length')
+    parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
+    parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
+    parser.add_argument('--pred_len', type=int, default=2, help='prediction sequence length')
     # Informer decoder input: concat[start token series(label_len), zero padding series(pred_len)]
 
     parser.add_argument('--enc_in', type=int, default=1, help='encoder input size')
@@ -97,11 +99,11 @@ def args_parsing():
         'SRL_POS_20_24':{'data':'SRL_POS_20_24.csv','T':'capacity_price','S':[1,1,1]},
     }
 
-    if args.data in data_parser.keys():
-        data_info = data_parser[args.data]
-        args.data_path = data_info['data']
-        args.target = data_info['T']
-        args.enc_in, args.dec_in, args.c_out = data_info[args.features]
+    # if args.data in data_parser.keys():
+    #     data_info = data_parser[args.data]
+    #     args.data_path = data_info['data']
+    #     args.target = data_info['T']
+    #     args.enc_in, args.dec_in, args.c_out = data_info[args.features]
 
     args.s_layers = [int(s_l) for s_l in args.s_layers.replace(' ','').split(',')]
     args.detail_freq = args.freq

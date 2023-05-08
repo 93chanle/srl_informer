@@ -11,7 +11,7 @@ class ProcessedResult():
     def __init__(self, preds, trues, train_scaler, args, data):
         self.scaler = train_scaler
         self.args = args
-        self.pred_len = preds.shape[0]
+        self.num_pred = preds.shape[0]
         self.pred_raw = self.convert_seq(preds, inverse=False)
         self.true_raw = self.convert_seq(trues, inverse=False)
         self.pred = self.convert_seq(preds, inverse=True)
@@ -29,9 +29,11 @@ class ProcessedResult():
             
         else:
             array = seq.squeeze()
-            array = np.array([np.concatenate([np.repeat(np.nan, i), array[i], np.repeat(np.nan, self.pred_len-i-1)]) for i in np.arange(self.pred_len)])
+            array = np.array([np.concatenate([np.repeat(np.nan, i), array[i], np.repeat(np.nan, self.num_pred-i-1)]) for i in np.arange(self.num_pred)])
             df = pd.DataFrame(array.transpose())
-            return df.mean(axis=1)
+            average = df.mean(axis=1)
+            
+            return average[:self.num_pred] # so that
 
     def plot_pred_vs_true(self, pred):
         fig, ax = plt.subplots(figsize=(12,6))

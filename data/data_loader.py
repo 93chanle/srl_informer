@@ -211,6 +211,7 @@ class Dataset_Custom(Dataset):
         self.target = target
         
         assert scale in ['minmax', 'standard', 'none']
+        
         self.scale = scale        
         self.inverse = inverse
         self.timeenc = timeenc
@@ -241,9 +242,10 @@ class Dataset_Custom(Dataset):
             cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')
         df_raw = df_raw[['date']+cols+[self.target]]
         
-        num_test = int(len(df_raw)*0.1)
-        num_vali = int(len(df_raw)*0.2)
-        num_train = len(df_raw) - num_vali - num_test - self.seq_len
+        # This is the number of sequences we are getting from the input time series
+        num_test = int(len(df_raw)*0.2) - self.pred_len
+        num_vali = int(len(df_raw)*0.3)
+        num_train = len(df_raw) - num_vali - num_test - self.seq_len - self.pred_len
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
@@ -251,11 +253,12 @@ class Dataset_Custom(Dataset):
         elif self.features=='S':
             df_data = df_raw[[self.target]]
             
-        if self.scale:
+            
+        if self.scale == 'standard':
             train_data = df_data[0:num_train+self.seq_len]
             self.scaler.fit(train_data.values)
             data = self.scaler.transform(df_data.values)
-        else:
+        elif self.scale == 'none':
             data = df_data.values #np.array
             
         df_stamp = df_raw[['date']]
