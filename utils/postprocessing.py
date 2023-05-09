@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.metrics import weighted_RMSE, RMSE, MSE
+from utils.metrics import weighted_RMSE, RMSE, MSE, LinEx
 import matplotlib.dates as mdates
 import torch
 
@@ -37,12 +37,18 @@ class ProcessedResult():
 
     def plot_pred_vs_true(self, pred):
         
-        fig, ax = plt.subplots(figsize=(12,6))
+        fig, ax = plt.subplots(figsize=(15,5))
         pred_non_neg = np.where(pred < 0, 0, pred)
 
-        ax.plot(self.data.target_date_range, self.true, label='True')
-        ax.plot(self.data.target_date_range, pred, label ='Raw prediction', linestyle ='--', alpha = 0.3)
-        ax.plot(self.data.target_date_range, pred_non_neg, label ='Predicted SRL price')
+        ax.plot(self.data.target_date_range, self.true, label='True', color='mediumturquoise')
+        ax.plot(self.data.target_date_range, pred, label ='Raw prediction', linestyle ='--', alpha = 0.3, color='green')
+        ax.plot(self.data.target_date_range, pred_non_neg, label ='Predicted SRL price', color='tomato')
+
+        # Plot where revenues are made
+        range = self.data.target_date_range.reset_index(drop=True)
+        diff = pred - self.true
+        query = (diff < 0) & (pred > 0) # Positive predictions which are lower than trues
+        ax.plot(range[query], pred_non_neg[query], '.', alpha=0.4, color='black', label ='Revenue made')
 
         # plt.annotate(f'Predicted revenue: {self.predict_revenue(pred)}€', 
         #              xy=(0.05, 0.9), xycoords='axes fraction',
@@ -51,14 +57,24 @@ class ProcessedResult():
         #              xy=(0.05, 0.8), xycoords='axes fraction',
         #              bbox=dict(boxstyle="round,pad=0.3", fc="cyan", ec="b", lw=1, alpha=0.5))
 
-        plt.annotate(f'Predicted revenue: {self.predict_revenue(pred)}€, Baseline revenue: {self.predict_revenue(self.pred_naive)}€, Weighted RMSE (alpha={self.args.w_rmse_weight}): {self.weighted_rmse(pred)}', 
-                        xy=(0.1, -0.1), xycoords='axes fraction',
+        plt.annotate(f'Predicted revenue: {self.predict_revenue(pred)}€, Baseline revenue: {self.predict_revenue(self.pred_naive)}€, Loss: {self.loss(pred)}', 
+                        xy=(0.1, -0.2), xycoords='axes fraction',
                         bbox=dict(boxstyle="round,pad=0.3", fc="cyan", ec="b", lw=1, alpha=0.2))
 
-        args = add_line_breaks_to_args_string(self.args, max_len=80)
+
+        args_dict = self.args.__dict__
+
+        loss_weights = ['linex_weight', 'w_rmse_weight']
+
+        if f'{self.args.loss}_weight' in loss_weights:
+            for loss_weight in loss_weights:
+                if loss_weight != f'{self.args.loss}_weight' and 'w_rmse_weight' in args_dict.keys():
+                    del args_dict[loss_weight]
+
+        args = add_line_breaks_to_args_string(args_dict, max_len=120)
 
         plt.annotate(args, 
-                        xy=(0.1, -0.5), xycoords='axes fraction',
+                        xy=(0.1, -0.7), xycoords='axes fraction',
                         bbox=dict(boxstyle="round,pad=0.3", fc="gray", ec="b", lw=1, alpha=0.1))
 
         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=1))
@@ -67,52 +83,7 @@ class ProcessedResult():
         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         # Title
-        ax.set_title(f'{self.args.data}, on validation set, from {self.data.target_date_range.iloc[0]._date_repr} to {self.data.target_date_range.iloc[-1]._date_repr}') # Get string representation
-
-        # plt.close()
-        return(fig)
-    
-    def predict_revenue(self, pred):
-        pred_non_neg = np.where(pred < 0, 0, pred)
-        return np.nansum(np.where(pred_non_neg > self.true, 0, pred_non_neg)).round(2)
-    
-    def weighted_rmse(self, pred):
-        result = weighted_RMSE(pred, self.true, self.args.w_rmse_weight)
-        return result
-    
-    
-class ProcessedResultXGB():
-    def __init__(self, pred, true, args, dataset):
-        self.args = args
-        self.pred = pred
-        self.true = true
-        self.pred_naive = self.true.shift(1, fill_value=true[0])
-        self.dataset = dataset
-    
-    def plot_pred_vs_true(self, pred):
-        fig, ax = plt.subplots(figsize=(12,6))
-        pred_non_neg = np.where(pred < 0, 0, pred)
-        
-        date_index = self.dataset.val.time_index
-        
-        ax.plot(date_index, self.true, label='True')
-        ax.plot(date_index, pred, label ='Raw prediction', linestyle ='--', alpha = 0.3)
-        ax.plot(date_index, pred_non_neg, label ='Predicted SRL price')
-        
-        plt.annotate(f'Predicted revenue: {self.predict_revenue(pred)}€, Baseline revenue: {self.predict_revenue(self.pred_naive)}€', 
-                     xy=(0.1, -0.1), xycoords='axes fraction',
-                     bbox=dict(boxstyle="round,pad=0.3", fc="cyan", ec="b", lw=1, alpha=0.2))
-        
-        #, Weighted RMSE (alpha={self.args.alpha}): {self.weighted_rmse(pred)}
-        
-        ax.xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=1))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
-        
-        plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-        
-        # Title
-        ax.set_title(f'{self.dataset.product_type}, on validation set, from {date_index[0]} to {date_index[-1]}')
-
+        ax.set_title(f'Product {self.args.data}, {self.data.target_date_range.iloc[0]._date_repr} to {self.data.target_date_range.iloc[-1]._date_repr} (Validation Set)') # Get string representation
         plt.close()
         return(fig)
     
@@ -120,10 +91,56 @@ class ProcessedResultXGB():
         pred_non_neg = np.where(pred < 0, 0, pred)
         return np.nansum(np.where(pred_non_neg > self.true, 0, pred_non_neg)).round(2)
     
-    def weighted_rmse(self, pred):
-        result = weighted_RMSE(pred, self.true, self.args.alpha)
+    def loss(self, pred):
+        match self.args.loss:
+            case 'linex':
+                result = LinEx(pred, self.true, self.args.linex_weight)
+            case 'w_rmse':
+                result = weighted_RMSE(pred, self.true, self.args.w_rmse_weight)
+            case 'rmse':
+                result = RMSE(pred, self.true)
         return result
     
-    def rmse(self, pred):
-        result = RMSE(pred, self.true)
-        return result
+# class ProcessedResultXGB():
+#     def __init__(self, pred, true, args, dataset):
+#         self.args = args
+#         self.pred = pred
+#         self.true = true
+#         self.pred_naive = self.true.shift(1, fill_value=true[0])
+#         self.dataset = dataset
+    
+#     def plot_pred_vs_true(self, pred):
+#         fig, ax = plt.subplots(figsize=(12,6))
+#         pred_non_neg = np.where(pred < 0, 0, pred)
+        
+#         date_index = self.dataset.val.time_index
+        
+#         ax.plot(date_index, self.true, label='True')
+#         ax.plot(date_index, pred, label ='Raw prediction', linestyle ='--', alpha = 0.3)
+#         ax.plot(date_index, pred_non_neg, label ='Predicted SRL price')
+        
+#         plt.annotate(f'Predicted revenue: {self.predict_revenue(pred)}€, Baseline revenue: {self.predict_revenue(self.pred_naive)}€, Loss: {self.loss(pred)}', 
+#                      xy=(0.1, -0.1), xycoords='axes fraction',
+#                      bbox=dict(boxstyle="round,pad=0.3", fc="cyan", ec="b", lw=1, alpha=0.2))
+        
+#         #, Weighted RMSE (alpha={self.args.alpha}): {self.weighted_rmse(pred)}
+        
+#         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonthday=1, interval=1))
+#         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+        
+#         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        
+#         # Title
+#         ax.set_title(f'{self.dataset.product_type}, on validation set, from {date_index[0]} to {date_index[-1]}')
+
+#         plt.close()
+#         return(fig)
+    
+#     def predict_revenue(self, pred):
+#         pred_non_neg = np.where(pred < 0, 0, pred)
+#         return np.nansum(np.where(pred_non_neg > self.true, 0, pred_non_neg)).round(2)
+
+    
+#     def rmse(self, pred):
+#         result = RMSE(pred, self.true)
+#         return result

@@ -253,7 +253,6 @@ class Dataset_Custom(Dataset):
         elif self.features=='S':
             df_data = df_raw[[self.target]]
             
-            
         if self.scale == 'standard':
             train_data = df_data[0:num_train+self.seq_len]
             self.scaler.fit(train_data.values)
@@ -312,7 +311,7 @@ class Dataset_Custom(Dataset):
         
         # Raw data for plotting
         self.target_data = df_raw[idx_data[self.set_type]: idx_data[self.set_type + 1]]
-        self.target_date_range = pd.to_datetime(self.target_data['date'], format = '%m/%d/%Y')
+        self.target_date_range = pd.to_datetime(self.target_data['date'], format = '%Y-%m-%d')
 
     # def __getitem__(self, index):
     #     s_begin = index

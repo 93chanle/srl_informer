@@ -122,14 +122,14 @@ class Exp_Informer(Exp_Basic):
     def _select_criterion(self):
         
         # criterion =  LinExLoss(self.args.linex_weight)
-        
         match self.args.loss:
             case 'linex':
                 criterion=LinExLoss(self.args.linex_weight)
-            case 'weighted_rmse':
+            case 'w_rmse':
                 criterion=WeightedRMSE(self.args.w_rmse_weight)
             case 'rmse':
                 criterion=nn.MSELoss()
+
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
@@ -139,6 +139,7 @@ class Exp_Informer(Exp_Basic):
             try:
                 pred, true = self._process_one_batch(
                     vali_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
+                loss = criterion(pred.detach().cpu(), true.detach().cpu())
                 loss = criterion(pred.detach().cpu(), true.detach().cpu())
                 total_loss.append(loss)
             except RuntimeError as e:

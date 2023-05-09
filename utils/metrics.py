@@ -34,10 +34,15 @@ def metric(pred, true):
     
     return mae,mse,rmse,mape,mspe
 
-def weighted_RMSE(pred, true, alpha):
+def weighted_RMSE(pred, true, w_rmse_weight):
     diff = pred - true
-    weighted_diff = np.where(diff > 0, diff*alpha, diff)
+    weighted_diff = np.where(diff > 0, diff*w_rmse_weight, diff)
     return np.sqrt((weighted_diff**2).mean()).round(2)
+
+def LinEx(pred, true, linex_weight):
+    diff = pred - true # this order matters
+    loss = (2/np.power(linex_weight, 2))*(np.exp(linex_weight*diff)- linex_weight*diff - 1)
+    return np.sqrt((loss).mean()).round(2)
     
 class RevenueLoss(nn.Module):
     def __init__(self):
@@ -59,6 +64,18 @@ class WeightedRMSE(nn.Module):
         weighted_diff = torch.where(diff > 0, diff*self.w_rmse_weight, diff)
         return torch.sqrt((weighted_diff**2).mean())
     
+class LinLinLoss(nn.Module):
+    '''
+    alpha: weight parameter to penalize more when pred > true
+    '''
+    def __init__(self, linlin_weight):
+        super(LinLinLoss, self).__init__()
+        self.linlin_weight = linlin_weight # prob of underforcast, 1- : overforecast
+    
+    def forward(self, pred, true):
+        diff = pred - true
+        weighted_diff = torch.where(diff > 0, diff*self.w_rmse_weight, diff)
+        return torch.sqrt((weighted_diff**2).mean())
     
 class LinExLoss(nn.Module):
     '''
@@ -71,9 +88,10 @@ class LinExLoss(nn.Module):
     def forward(self, pred, true):
         diff = pred - true # this order matters
         linex_weight = torch.tensor(self.linex_weight)
+        a = (2/torch.pow(linex_weight, 2))
+        b = (torch.exp(linex_weight*diff)- linex_weight*diff - 1)
         loss = (2/torch.pow(linex_weight, 2))*(torch.exp(linex_weight*diff)- linex_weight*diff - 1)
         return torch.sqrt((loss).mean())
-
 
 class PositiveMSE(nn.Module):
     def __init__(self):
