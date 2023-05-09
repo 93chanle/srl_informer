@@ -12,10 +12,18 @@ def args_parsing():
 
     parser = argparse.ArgumentParser(description='[Informer] Long Sequences Forecasting')
 
+    # Main arguements
+    parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
+    parser.add_argument('--loss', type=str, default='linex',help='customized loss functions, one of w_rmse, linex, rmse, ')
+
+    parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
+    parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
+    parser.add_argument('--pred_len', type=int, default=2, help='prediction sequence length')
+
     parser.add_argument('--timestamp', type=str, default=now)
-    parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
+    
     parser.add_argument('--root_path', type=str, default='./data/processed/SRL/', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04_dummy.csv', help='data file')    
     parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
@@ -25,9 +33,10 @@ def args_parsing():
     parser.add_argument('--freq', type=str, default='d', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
 
-    parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
-    parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
-    parser.add_argument('--pred_len', type=int, default=2, help='prediction sequence length')
+    parser.add_argument('--w_rmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
+    parser.add_argument('--linex_weight', type=float, default=0.001,help='weighted parameter for linear-exponential loss function')
+
+
     # Informer decoder input: concat[start token series(label_len), zero padding series(pred_len)]
 
     parser.add_argument('--enc_in', type=int, default=1, help='encoder input size')
@@ -66,12 +75,8 @@ def args_parsing():
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
     parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
     parser.add_argument('--devices', type=str, default='0,1,2,3',help='device ids of multile gpus')
-
-    parser.add_argument('--loss', type=str, default='linexp',help='customized loss functions, one of weighted_rmse, linexp, rmse')
-
-    parser.add_argument('--alpha', type=float, default=5,help='weighted parameter for weighted rmse loss function')
-    parser.add_argument('--linexp_weight', type=float, default=0.001,help='weighted parameter for linear-exponential loss function')
-
+    
+    
 
     args = parser.parse_args()
 

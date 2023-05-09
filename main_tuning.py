@@ -68,7 +68,7 @@ parser.add_argument('--train_epochs', type=int, default=6, help='train epochs')
 parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
 parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
 parser.add_argument('--alpha', type=float, default=10,help='weighted parameter for loss function')
-parser.add_argument('--linexp_weight', type=float, default=0.001,help='weighted parameter for linear-exponential loss function')
+parser.add_argument('--linex_weight', type=float, default=0.001,help='weighted parameter for linear-exponential loss function')
 
 
 args = parser.parse_args()
@@ -129,7 +129,7 @@ search_space = {'learning_rate': tune.loguniform(1e-5, 1e-2),
                 'n_heads': tune.choice([4, 8, 12, 16, 24, 32]),
                 'd_model': tune.choice([128, 256, 512, 1024]),
                 'batch_size': tune.choice([4, 8, 16, 32]),
-                'linexp_weight': tune.quniform(0.001, 3, 0.001),
+                'linex_weight': tune.quniform(0.001, 3, 0.001),
                 }
 
 # Define trainable
@@ -146,7 +146,7 @@ def trainable(config):
     args.n_heads = config['n_heads']
     args.d_model = config['d_model']
     args.batch_size = config['batch_size']
-    args.linexp_weight = config['linexp_weight']
+    args.linex_weight = config['linex_weight']
 
     print(f'--------------Start new run-------------------')
     # print(f'Tune learning rate: {args.learning_rate}')

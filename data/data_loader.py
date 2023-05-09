@@ -312,7 +312,8 @@ class Dataset_Custom(Dataset):
         
         # Raw data for plotting
         self.target_data = df_raw[idx_data[self.set_type]: idx_data[self.set_type + 1]]
-    
+        self.target_date_range = pd.to_datetime(self.target_data['date'], format = '%m/%d/%Y')
+
     # def __getitem__(self, index):
     #     s_begin = index
     #     s_end = s_begin + self.seq_len

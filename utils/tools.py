@@ -15,6 +15,34 @@ def adjust_learning_rate(optimizer, epoch, args):
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
         print('Updating learning rate to {}'.format(lr))
+        
+def add_line_breaks_to_args_string(args, max_len=80):
+    """ Break long string of args Namespaces with line breaks
+    for plotting results.
+
+    Args:
+        args (str): args list pron args_parser
+        max_len (int): max length before adding line break
+    """
+    
+    max_len = 80
+    rows = ['']
+
+    # Convert to string
+    args = str(args)
+
+    # Filter content within brackets
+    args = args[args.find("(")+1:args.find(")")].split(',')
+
+    # Add args to a row until max_len reached, then create new row
+    for arg in args:
+        if len(rows[-1]) < max_len:
+            rows[-1] = rows[-1] + (arg) + ',' 
+        else:
+            rows.append('')
+            rows[-1] = rows[-1] + (arg) + ',' 
+    
+    return '\n'.join(rows)
 
 class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0):

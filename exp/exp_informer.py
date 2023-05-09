@@ -4,7 +4,7 @@ from models.model import Informer, InformerStack
 from utils.postprocessing import ProcessedResult
 
 from utils.tools import EarlyStopping, adjust_learning_rate, EarlyStoppingNoSaveModel
-from utils.metrics import metric, WeightedRMSE, weighted_RMSE, LinExpLoss
+from utils.metrics import metric, WeightedRMSE, weighted_RMSE, LinExLoss
 
 import numpy as np
 
@@ -121,13 +121,13 @@ class Exp_Informer(Exp_Basic):
     
     def _select_criterion(self):
         
-        # criterion =  LinExpLoss(self.args.linexp_weight)
+        # criterion =  LinExLoss(self.args.linex_weight)
         
         match self.args.loss:
-            case 'linexp':
-                criterion=LinExpLoss(self.args.linexp_weight)
+            case 'linex':
+                criterion=LinExLoss(self.args.linex_weight)
             case 'weighted_rmse':
-                criterion=WeightedRMSE(self.args.alpha)
+                criterion=WeightedRMSE(self.args.w_rmse_weight)
             case 'rmse':
                 criterion=nn.MSELoss()
         return criterion
@@ -305,11 +305,10 @@ class Exp_Informer(Exp_Basic):
         
         # Create result object
         result = ProcessedResult(preds=preds, trues=trues, 
-                                 train_scaler=train_data.scaler,
                                  args=self.args,
                                  data=test_data)   
         # Dump result object
-        with open('processed_result_test.pickle', 'wb') as f:
+        with open('processed_result_test.pkl', 'wb') as f:
             pkl.dump(result, f)
         
         predicted_revenue = result.predict_revenue(result.pred)

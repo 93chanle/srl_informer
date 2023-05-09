@@ -50,27 +50,28 @@ class WeightedRMSE(nn.Module):
     '''
     alpha: weight parameter to penalize more when pred > true
     '''
-    def __init__(self, alpha):
+    def __init__(self, w_rmse_weight):
         super(WeightedRMSE, self).__init__()
-        self.alpha = alpha
+        self.w_rmse_weight = w_rmse_weight
     
     def forward(self, pred, true):
         diff = pred - true
-        weighted_diff = torch.where(diff > 0, diff*self.alpha, diff)
+        weighted_diff = torch.where(diff > 0, diff*self.w_rmse_weight, diff)
         return torch.sqrt((weighted_diff**2).mean())
     
-class LinExpLoss(nn.Module):
+    
+class LinExLoss(nn.Module):
     '''
     alpha: weight parameter to penalize more when pred > true
     '''
-    def __init__(self, linexp_weight):
-        super(LinExpLoss, self).__init__()
-        self.linexp_weight = linexp_weight
+    def __init__(self, linex_weight):
+        super(LinExLoss, self).__init__()
+        self.linex_weight = linex_weight
     
     def forward(self, pred, true):
         diff = pred - true # this order matters
-        linexp_weight = torch.tensor(self.linexp_weight)
-        loss = (2/torch.pow(linexp_weight, 2))*(torch.exp(linexp_weight*diff)- linexp_weight*diff - 1)
+        linex_weight = torch.tensor(self.linex_weight)
+        loss = (2/torch.pow(linex_weight, 2))*(torch.exp(linex_weight*diff)- linex_weight*diff - 1)
         return torch.sqrt((loss).mean())
 
 
