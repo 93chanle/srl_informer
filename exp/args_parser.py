@@ -16,10 +16,11 @@ def args_parsing():
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-    parser.add_argument('--loss', type=str, default='linex',help='customized loss functions, one of w_rmse, linex, rmse')
+    parser.add_argument('--loss', type=str, default='linex',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
 
     parser.add_argument('--w_rmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
-    parser.add_argument('--linex_weight', type=float, default=2,help='weighted parameter for linear-exponential loss function')
+    parser.add_argument('--linex_weight', type=float, default=0.05,help='weighted parameter for linear-exponential loss function')
+    parser.add_argument('--linlin_weight', type=float, default=0.8,help='weighted parameter for linlin / pinball loss function')
 
     parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
     parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
