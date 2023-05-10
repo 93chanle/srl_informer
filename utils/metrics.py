@@ -14,7 +14,7 @@ def MAE(pred, true):
     return np.mean(np.abs(pred-true))
 
 def MSE(pred, true):
-    return np.mean((pred-true)**2)
+    return np.mean((pred-true)**2).round(2)
 
 def RMSE(pred, true):
     return np.sqrt(MSE(pred, true))
@@ -47,7 +47,7 @@ def LinEx(pred, true, linex_weight):
 def LinLin(pred, true, linlin_weight):
     diff = true - pred # positive = underestimation, negative = overestimation
     loss = np.where(diff > 0, diff*linlin_weight, -diff*(1-linlin_weight))
-    return (loss).mean().round(2)
+    return np.abs((loss)).mean().round(2)
     
 class RevenueLoss(nn.Module):
     def __init__(self):

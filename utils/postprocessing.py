@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from utils.metrics import weighted_RMSE, RMSE, MSE, LinEx
+from utils.metrics import weighted_RMSE, RMSE, MSE, LinEx, LinLin
 import matplotlib.dates as mdates
 import torch
 
@@ -64,11 +64,11 @@ class ProcessedResult():
 
         args_dict = self.args.__dict__
 
-        loss_weights = ['linex_weight', 'w_rmse_weight']
+        loss_weights = ['linex_weight', 'w_rmse_weight', 'linlin_weight']
 
         if f'{self.args.loss}_weight' in loss_weights:
             for loss_weight in loss_weights:
-                if loss_weight != f'{self.args.loss}_weight' and 'w_rmse_weight' in args_dict.keys():
+                if loss_weight != f'{self.args.loss}_weight' and f'{self.args.loss}_weight' in args_dict.keys():
                     del args_dict[loss_weight]
 
         args = add_line_breaks_to_args_string(args_dict, max_len=120)
@@ -99,6 +99,8 @@ class ProcessedResult():
                 result = weighted_RMSE(pred, self.true, self.args.w_rmse_weight)
             case 'rmse':
                 result = RMSE(pred, self.true)
+            case 'linlin':
+                result = LinLin(pred, self.true, self.args.linlin_weight)
         return result
     
 # class ProcessedResultXGB():

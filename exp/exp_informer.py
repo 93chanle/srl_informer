@@ -4,7 +4,7 @@ from models.model import Informer, InformerStack
 from utils.postprocessing import ProcessedResult
 
 from utils.tools import EarlyStopping, adjust_learning_rate, EarlyStoppingNoSaveModel
-from utils.metrics import metric, WeightedRMSE, weighted_RMSE, LinExLoss
+from utils.metrics import metric, WeightedRMSE, weighted_RMSE, LinExLoss, LinLinLoss
 
 import numpy as np
 
@@ -129,7 +129,8 @@ class Exp_Informer(Exp_Basic):
                 criterion=WeightedRMSE(self.args.w_rmse_weight)
             case 'rmse':
                 criterion=nn.MSELoss()
-
+            case 'linlin':
+                criterion=LinLinLoss(self.args.linlin_weight)
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
