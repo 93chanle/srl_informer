@@ -17,6 +17,8 @@ now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
 Exp = Exp_Informer
 
+
+
 ### TUNING 
 
 # Define search space
@@ -37,17 +39,18 @@ search_space = {'learning_rate': tune.loguniform(1e-5, 1e-2),
 
 match args.loss:
     case 'linex':
-        search_space['linex_weight'] = tune.quniform(0.001, 3, 0.001)
+        search_space['linex_weight'] = tune.quniform(0.01, 3, 0.005)
     case 'w_rmse':
         search_space['w_rmse_weight'] = tune.quniform(1, 10, 0.1)
+    case 'linlin':
+        search_space['linlin_weight'] = tune.quniform(0.1, 0.95, 0.01)
 
 # Define trainable
 # exp.tune() serves as objective function for Ray
 def trainable(config):
-        
+
     args.learning_rate = config["learning_rate"]
     args.train_epochs = config["train_epochs"]
-    args.alpha = config['alpha']
     args.seq_len = config['seq_len']
     args.label_len = min(int(config['label_seq_len_ratio'] * args.seq_len), 77)
     args.e_layers = config['e_layers']
@@ -55,13 +58,14 @@ def trainable(config):
     args.n_heads = config['n_heads']
     args.d_model = config['d_model']
     args.batch_size = config['batch_size']
-    args.linex_weight = config['linex_weight']
     
     match args.loss:
         case 'linex':
             args.linex_weight = config['linex_weight']
         case 'w_rmse':
             args.w_rmse_weight = config['w_rmse_weight']
+        case 'linlin':
+            args.linlin_weight = config['linlin_weight']
 
     print(f'--------------Start new run-------------------')
     # print(f'Tune learning rate: {args.learning_rate}')
@@ -104,7 +108,7 @@ tuner = tune.Tuner(
     trainable,
     tune_config=tune.TuneConfig(
         search_alg=algo,
-        num_samples=200,
+        num_samples=100,
         trial_dirname_creator=my_trial_dirname_creator,
     ),
     run_config=air.RunConfig(

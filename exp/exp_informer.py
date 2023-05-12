@@ -176,7 +176,6 @@ class Exp_Informer(Exp_Basic):
         
         # Create result object
         result = ProcessedResult(preds=preds, trues=trues, 
-                                 train_scaler=train_data.scaler,
                                  args=self.args,
                                  data=vali_data)
         predicted_revenue = result.predict_revenue(result.pred)

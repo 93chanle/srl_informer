@@ -16,7 +16,7 @@ def args_parsing():
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-    parser.add_argument('--loss', type=str, default='linex',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
+    parser.add_argument('--loss', type=str, default='linlin',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
 
     parser.add_argument('--w_rmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
     parser.add_argument('--linex_weight', type=float, default=0.05,help='weighted parameter for linear-exponential loss function')
@@ -28,7 +28,7 @@ def args_parsing():
 
     parser.add_argument('--timestamp', type=str, default=now)
     
-    parser.add_argument('--root_path', type=str, default='./data/processed/SRL/', help='root path of the data file')
+    parser.add_argument('--root_path', type=str, default= 'C:\\codes\\srl_informer\\data\\processed\\SRL\\', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04.csv', help='data file')    
     parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     
@@ -120,3 +120,4 @@ def args_parsing():
 
 # with open("args.yaml", "w") as f:
 #     yaml.dump(args, f)
+
