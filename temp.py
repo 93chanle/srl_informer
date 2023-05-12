@@ -16,11 +16,12 @@ data_set = Dataset_Custom(
             data_path='SRL_NEG_00_04.csv',
             flag='test',
             size=[96, 48, 3],
-            features='S',
+            features='MS',
             target='capacity_price',
             inverse=False,
             timeenc=1,
             freq='d',
-            cols=None
+            cols=['gas', 'coal']
         )
 
+print('finish')

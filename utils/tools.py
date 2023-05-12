@@ -1,5 +1,7 @@
 import numpy as np
 import torch
+import sys
+import types
 
 def adjust_learning_rate(optimizer, epoch, args):
     # lr = args.learning_rate * (0.2 ** (epoch // 2))
@@ -154,3 +156,31 @@ class EarlyStoppingNoSaveModel:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), path+'/'+'checkpoint.pth')
         self.val_loss_min = val_loss
+
+def autoimport(module: types.ModuleType) -> None:
+
+    try:
+        del sys.modules[module.__name__]
+    except KeyError:
+        pass
+    
+#----------
+    
+import sys
+import types
+from importlib import import_module
+
+def autoimport(module_name: str) -> None:
+    """Deletes an already imported module during interactive (Jupyter Notebook).
+    The updated module can later be imported again. Useful when woring on a
+    py script and want to test it in Jupyter Notebook.
+
+    Args:
+        module_name (str): name of sub(module). Can be name.of.sub.modules
+    """
+    try:
+        del sys.modules[module_name]
+    except KeyError:
+        pass
+    
+    import_module(module_name)

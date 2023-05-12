@@ -116,6 +116,5 @@ df_cap = df.groupby(['date', 'product'], as_index=False).max('capacity_price')
 
 for product in df_cap['product'].unique():
     df_ = df_cap[df_cap['product'] == product]
-    df_.to_csv(f'data/processed/SRL_{product}.csv', index=False)
-    
+    df_.to_csv(f'data/processed/SRL/SRL_{product}.csv', index=False)
     
