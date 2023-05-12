@@ -30,9 +30,10 @@ def args_parsing():
     
     parser.add_argument('--root_path', type=str, default='./data/processed/SRL/', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04.csv', help='data file')    
-    parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
+    parser.add_argument('--features', type=str, default='MS', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
+    parser.add_argument('--cols', type=str, nargs='+', help='external col names from the data files as the additional input features (not including target)')
     
-    parser.add_argument('--scale', type=str, default='standard', help='forecasting task, options:[standard, minmax, none]')
+    parser.add_argument('--scale', type=str, default='standard', help='forecasting task, options: [standard, minmax, none]')
     parser.add_argument('--target', type=str, default='capacity_price', help='target feature in S or MS task')
     parser.add_argument('--freq', type=str, default='d', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
@@ -58,10 +59,9 @@ def args_parsing():
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
     parser.add_argument('--mix', action='store_false', help='use mix attention in generative decoder', default=True)
-    parser.add_argument('--cols', type=str, nargs='+', help='certain cols from the data files as the input features')
     parser.add_argument('--num_workers', type=int, default=0, help='data loader num workers')
     parser.add_argument('--itr', type=int, default=1, help='experiments times')
-    parser.add_argument('--train_epochs', type=int, default=5, help='train epochs')
+    parser.add_argument('--train_epochs', type=int, default=3, help='train epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
     parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
@@ -112,6 +112,12 @@ def args_parsing():
     args.s_layers = [int(s_l) for s_l in args.s_layers.replace(' ','').split(',')]
     args.detail_freq = args.freq
     args.freq = args.freq[-1:]
+
+
+    # Pass default values for external data incorporation
+    if args.features == 'MS' and args.cols is None:
+        args.cols = ['gas', 'coal']
+
 
     print('Args in experiment:')
     print(args)

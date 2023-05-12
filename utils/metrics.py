@@ -46,8 +46,8 @@ def LinEx(pred, true, linex_weight):
 
 def LinLin(pred, true, linlin_weight):
     diff = true - pred # positive = underestimation, negative = overestimation
-    loss = np.where(diff > 0, diff*linlin_weight, -diff*(1-linlin_weight))
-    return np.abs((loss)).mean().round(2)
+    loss = np.where(diff < 0, -diff*linlin_weight, diff*(1-linlin_weight))
+    return loss.mean().round(2)
     
 class RevenueLoss(nn.Module):
     def __init__(self):
@@ -79,9 +79,9 @@ class LinLinLoss(nn.Module):
     
     def forward(self, pred, true):
         diff = pred - true
-        weighted_diff = torch.where(diff < 0, diff*self.linlin_weight, diff*(1-self.linlin_weight))
-        return (weighted_diff**2).mean()
-    
+        weighted_diff = torch.where(diff < 0, -diff*self.linlin_weight, diff*(1-self.linlin_weight))
+        return weighted_diff.mean() # MAE?
+     
 class LinExLoss(nn.Module):
     def __init__(self, linex_weight):
         super(LinExLoss, self).__init__()

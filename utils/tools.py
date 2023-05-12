@@ -170,7 +170,7 @@ import sys
 import types
 from importlib import import_module
 
-def autoload_script(module_name: str) -> None:
+def autoimport(module_name: str) -> None:
     """Deletes an already imported module during interactive (Jupyter Notebook).
     The updated module can later be imported again. Useful when woring on a
     py script and want to test it in Jupyter Notebook.
