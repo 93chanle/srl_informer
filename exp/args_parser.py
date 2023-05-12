@@ -16,11 +16,11 @@ def args_parsing():
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-    parser.add_argument('--loss', type=str, default='linex',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
+    parser.add_argument('--loss', type=str, default='linlin',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
 
     parser.add_argument('--w_rmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
     parser.add_argument('--linex_weight', type=float, default=0.05,help='weighted parameter for linear-exponential loss function')
-    parser.add_argument('--linlin_weight', type=float, default=0.8,help='weighted parameter for linlin / pinball loss function')
+    parser.add_argument('--linlin_weight', type=float, default=0.1,help='weighted parameter for linlin / pinball loss function')
 
     parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
     parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
@@ -30,8 +30,11 @@ def args_parsing():
     
     parser.add_argument('--root_path', type=str, default='./data/processed/SRL/', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04.csv', help='data file')    
-    parser.add_argument('--features', type=str, default='MS', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
+    parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     parser.add_argument('--cols', type=str, nargs='+', help='external col names from the data files as the additional input features (not including target)')
+    
+    parser.add_argument('--itr', type=int, default=2, help='experiments times')
+    parser.add_argument('--train_epochs', type=int, default=6, help='train epochs')
     
     parser.add_argument('--scale', type=str, default='standard', help='forecasting task, options: [standard, minmax, none]')
     parser.add_argument('--target', type=str, default='capacity_price', help='target feature in S or MS task')
@@ -60,8 +63,6 @@ def args_parsing():
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
     parser.add_argument('--mix', action='store_false', help='use mix attention in generative decoder', default=True)
     parser.add_argument('--num_workers', type=int, default=0, help='data loader num workers')
-    parser.add_argument('--itr', type=int, default=1, help='experiments times')
-    parser.add_argument('--train_epochs', type=int, default=3, help='train epochs')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
     parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')

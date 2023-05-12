@@ -234,25 +234,27 @@ class Dataset_Custom(Dataset):
         '''
         df_raw.columns: ['date', ...(other features), target feature]
         '''
+        
+        if self.features=='M' or self.features=='MS':
+            df_data = df_raw[self.cols+[self.target]]
+            
+            # df_raw[['date']+self.cols+[self.target]]
+        elif self.features=='S':
+            df_data = df_raw[[self.target]]
+            
         # cols = list(df_raw.columns); 
         # if self.cols:
         #     cols=self.cols.copy()
         #     cols.remove(self.target)
         # else:
         #     cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')
-        df_raw = df_raw[['date']+self.cols+[self.target]]
+        # df_raw = df_raw[['date']+self.cols+[self.target]]
         
         # This is the number of sequences we are getting from the input time series
         num_test = int(len(df_raw)*0.2) - self.pred_len
         num_vali = int(len(df_raw)*0.3)
         num_train = len(df_raw) - num_vali - num_test - self.seq_len - self.pred_len
         
-        if self.features=='M' or self.features=='MS':
-            cols_data = df_raw.columns[1:]
-            df_data = df_raw[cols_data]
-        elif self.features=='S':
-            df_data = df_raw[[self.target]]
-            
         if self.scale == 'standard':
             train_data = df_data[0:num_train+self.seq_len]
             self.scaler.fit(train_data.values)

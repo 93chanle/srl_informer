@@ -69,7 +69,11 @@ class ProcessedResult():
         if f'{self.args.loss}_weight' in loss_weights:
             for loss_weight in loss_weights:
                 if loss_weight != f'{self.args.loss}_weight' and f'{self.args.loss}_weight' in args_dict.keys():
-                    del args_dict[loss_weight]
+                    # del args_dict[loss_weight]
+                    try:
+                        args_dict.pop(loss_weight)
+                    except KeyError:
+                        print('Debug')
 
         args = add_line_breaks_to_args_string(args_dict, max_len=120)
 
