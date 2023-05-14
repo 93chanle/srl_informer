@@ -40,6 +40,8 @@ match args.loss:
         search_space['linex_weight'] = tune.quniform(0.001, 3, 0.001)
     case 'w_rmse':
         search_space['w_rmse_weight'] = tune.quniform(1, 10, 0.1)
+    case 'linlin':
+        search_space['linlin_weight'] = tune.quniform(0.05, 0.45, 0.025)  
 
 # Define trainable
 # exp.tune() serves as objective function for Ray
@@ -55,13 +57,14 @@ def trainable(config):
     args.n_heads = config['n_heads']
     args.d_model = config['d_model']
     args.batch_size = config['batch_size']
-    args.linex_weight = config['linex_weight']
     
     match args.loss:
         case 'linex':
             args.linex_weight = config['linex_weight']
         case 'w_rmse':
             args.w_rmse_weight = config['w_rmse_weight']
+        case 'linlin':
+            args.linlin_weight = config['linlin_weight']
 
     print(f'--------------Start new run-------------------')
     # print(f'Tune learning rate: {args.learning_rate}')
