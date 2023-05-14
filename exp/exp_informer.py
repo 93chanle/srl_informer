@@ -215,6 +215,7 @@ class Exp_Informer(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
+            if self.args.loss == 'linlin': percentile = [] 
             
             self.model.train()
             epoch_time = time.time()
@@ -226,6 +227,12 @@ class Exp_Informer(Exp_Basic):
                 # TRAIN HERE
                 pred, true = self._process_one_batch(
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
+                             
+                if self.args.loss == 'linlin':
+                        
+                    # Percentage of overestimation
+                    percentile.append((true - pred < 0).detach().cpu().numpy().mean())
+                
                 loss = criterion(pred, true)
                 train_loss.append(loss.item())
                 
@@ -253,6 +260,10 @@ class Exp_Informer(Exp_Basic):
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
             early_stopping(vali_loss, self.model, path)
+            
+            if self.args.loss == 'linlin':
+                print(f"Percentile (overestimation, pred > true): {np.mean(percentile)}")
+            
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
@@ -315,6 +326,10 @@ class Exp_Informer(Exp_Basic):
             pkl.dump(result, f)
         
         predicted_revenue = result.predict_revenue(result.pred)
+        percentile = (result.true - result.pred < 0).mean()
+        print(f'[VALI SET] Percentage of overestimation: {percentile}')
+        # percentile.append((true - pred < 0).detach().cpu().numpy().mean())
+                
         fig = result.plot_pred_vs_true(result.pred)
         fig.savefig(folder_path + 'informer_result.png', bbox_inches='tight')
         

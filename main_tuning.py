@@ -43,7 +43,7 @@ match args.loss:
     case 'w_rmse':
         search_space['w_rmse_weight'] = tune.quniform(1, 10, 0.1)
     case 'linlin':
-        search_space['linlin_weight'] = tune.quniform(0.1, 0.95, 0.01)
+        search_space['linlin_weight'] = tune.quniform(0.05, 0.45, 0.025)  
 
 # Define trainable
 # exp.tune() serves as objective function for Ray
