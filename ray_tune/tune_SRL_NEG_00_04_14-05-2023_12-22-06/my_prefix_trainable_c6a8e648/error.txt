@@ -1,0 +1,24 @@
+Failure # 1 (occurred at 2023-05-14_12-22-54)
+[36mray::ImplicitFunc.train()[39m (pid=4632, ip=127.0.0.1, repr=trainable)
+  File "python\ray\_raylet.pyx", line 830, in ray._raylet.execute_task
+  File "python\ray\_raylet.pyx", line 834, in ray._raylet.execute_task
+  File "python\ray\_raylet.pyx", line 780, in ray._raylet.execute_task.function_executor
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\_private\function_manager.py", line 674, in actor_method_executor
+    return method(__ray_actor, *args, **kwargs)
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\util\tracing\tracing_helper.py", line 466, in _resume_span
+    return method(self, *_args, **_kwargs)
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\tune\trainable\trainable.py", line 367, in train
+    raise skipped from exception_cause(skipped)
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\tune\trainable\function_trainable.py", line 335, in entrypoint
+    return self._trainable_func(
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\util\tracing\tracing_helper.py", line 466, in _resume_span
+    return method(self, *_args, **_kwargs)
+  File "C:\Users\CLE\AppData\Local\miniforge3\envs\thesis\lib\site-packages\ray\tune\trainable\function_trainable.py", line 652, in _trainable_func
+    output = fn()
+  File "C:\codes\srl_informer\main_tuning.py", line 85, in trainable
+    tune_loss, tune_revenue, model = exp.tune() # Compute metric
+  File "C:\codes\srl_informer\exp\exp_informer.py", line 433, in tune
+    pred, true = self._process_one_batch(
+  File "C:\codes\srl_informer\exp\exp_informer.py", line 379, in _process_one_batch
+    dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)
+RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu! (when checking argument for argument tensors in method wrapper_cat)

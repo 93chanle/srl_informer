@@ -1,0 +1,12 @@
+{
+  "batch_size": 4,
+  "d_layers": 1,
+  "d_model": 128,
+  "e_layers": 5,
+  "label_seq_len_ratio": 0.7000000000000001,
+  "learning_rate": 0.0005572773177476855,
+  "n_heads": 12,
+  "seq_len": 56,
+  "train_epochs": 9,
+  "w_rmse_weight": 1.2
+}

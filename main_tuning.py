@@ -108,7 +108,7 @@ tuner = tune.Tuner(
     trainable,
     tune_config=tune.TuneConfig(
         search_alg=algo,
-        num_samples=100,
+        num_samples=args.tune_num_samples,
         trial_dirname_creator=my_trial_dirname_creator,
     ),
     run_config=air.RunConfig(
