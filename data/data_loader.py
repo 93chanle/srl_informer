@@ -189,7 +189,7 @@ class Dataset_ETT_minute(Dataset):
 
 
 class Dataset_Custom(Dataset):
-    def __init__(self, root_path, flag='train', size=None, 
+    def __init__(self, root_path, flag='train', size=None, train_val_test_split = [0.7, 0.15, 0.15],
                  features='S', data_path='ETTh1.csv', 
                  target='capacity_price', scale='standard', inverse=False, timeenc=0, freq='h', cols=None):
         # size [seq_len, label_len, pred_len]
@@ -219,6 +219,7 @@ class Dataset_Custom(Dataset):
         self.cols=cols
         self.root_path = root_path
         self.data_path = data_path
+        self.train_val_test_split = train_test_split
         self.__read_data__()
 
     def __read_data__(self):
@@ -250,9 +251,11 @@ class Dataset_Custom(Dataset):
         #     cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')
         # df_raw = df_raw[['date']+self.cols+[self.target]]
         
+        assert sum(self.train_val_test_split) == 1.0
+        
         # This is the number of sequences we are getting from the input time series
-        num_test = int(len(df_raw)*0.15) - self.pred_len
-        num_vali = int(len(df_raw)*0.15)
+        num_test = int(len(df_raw)*self.train_val_test_split[2]) - self.pred_len
+        num_vali = int(len(df_raw)*self.train_val_test_split[1])
         num_train = len(df_raw) - num_vali - num_test - self.seq_len - self.pred_len
         
         if self.scale == 'standard':
@@ -483,7 +486,7 @@ class Dataset_SRL_XGBoost():
         self.val, self.test = train_test_split(temp, test_size=0.5)
         
 class Dataset_XGB(Dataset):
-    def __init__(self, root_path, flag='train', size=None, 
+    def __init__(self, root_path, flag='train', size=None, train_val_test_split = [0.7, 0.15, 0.15],
                  features='S', data_path='ETTh1.csv', 
                  target='capacity_price', scale='standard', inverse=False, timeenc=0, freq='d', cols=None):
         # size [seq_len, label_len, pred_len]
@@ -512,6 +515,7 @@ class Dataset_XGB(Dataset):
         self.cols=cols
         self.root_path = root_path
         self.data_path = data_path
+        self.train_val_test_split = train_val_test_split
         self.__read_data__()
 
     def __read_data__(self):
@@ -547,8 +551,11 @@ class Dataset_XGB(Dataset):
         # df_raw = df_raw[['date']+self.cols+[self.target]]
         
         # This is the number of sequences we are getting from the input time series
-        num_test = int(len(df_raw)*0.15) - self.target_len
-        num_vali = int(len(df_raw)*0.15)
+        assert sum(self.train_val_test_split) == 1.0
+        
+        # This is the number of sequences we are getting from the input time series
+        num_test = int(len(df_raw)*self.train_val_test_split[2]) - self.target_len
+        num_vali = int(len(df_raw)*self.train_val_test_split[1])
         num_train = len(df_raw) - num_vali - num_test - self.input_len - self.target_len
         
         if self.scale == 'standard':
