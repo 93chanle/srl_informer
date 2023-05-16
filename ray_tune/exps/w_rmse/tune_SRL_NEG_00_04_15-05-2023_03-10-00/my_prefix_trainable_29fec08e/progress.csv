@@ -1,0 +1,2 @@
+revenue,loss,time_this_iter_s,should_checkpoint,done,timesteps_total,episodes_total,training_iteration,trial_id,experiment_id,date,timestamp,time_total_s,pid,hostname,node_ip,time_since_restore,timesteps_since_restore,iterations_since_restore,warmup_time
+1884.37,0.07252064,76.69750595092773,True,False,,,1,29fec08e,5ad4d88eb76c4dae9bba489d5d1756a9,2023-05-15_03-29-02,1684114142,76.69750595092773,12040,azwewpcdml-1,127.0.0.1,76.69750595092773,0,1,0.0
