@@ -122,7 +122,7 @@ def args_parsing():
     if args.features == 'MS' and args.cols is None:
         args.cols = ['gas', 'coal']
 
-    args.root_path = os.path.normpath(args.root_path)
+    args.root_path = os.path.abspath(args.root_path)
 
     print('Args in experiment:')
     print(args)
