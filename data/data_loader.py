@@ -15,181 +15,8 @@ warnings.filterwarnings('ignore')
 from darts import TimeSeries
 from darts.utils.model_selection import train_test_split
 
-class Dataset_ETT_hour(Dataset):
-    def __init__(self, root_path, flag='train', size=None, 
-                 features='S', data_path='ETTh1.csv', 
-                 target='OT', scale='minmax', inverse=False, timeenc=0, freq='h', cols=None):
-        # size [seq_len, label_len, pred_len]
-        # info
-        if size == None:
-            self.seq_len = 24*4*4
-            self.label_len = 24*4
-            self.pred_len = 24*4
-        else:
-            self.seq_len = size[0]
-            self.label_len = size[1]
-            self.pred_len = size[2]
-        # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train':0, 'val':1, 'test':2}
-        self.set_type = type_map[flag]
-        
-        self.features = features
-        self.target = target
-        self.scale = scale
-        self.inverse = inverse
-        self.timeenc = timeenc
-        self.freq = freq
-        
-        self.root_path = root_path
-        self.data_path = data_path
-        self.__read_data__()
-
-    def __read_data__(self):
-        self.scaler = StandardScaler()
-        df_raw = pd.read_csv(os.path.join(self.root_path,
-                                          self.data_path))
-
-        border1s = [0, 12*30*24 - self.seq_len, 12*30*24+4*30*24 - self.seq_len]
-        border2s = [12*30*24, 12*30*24+4*30*24, 12*30*24+8*30*24]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
-        
-        if self.features=='M' or self.features=='MS':
-            cols_data = df_raw.columns[1:]
-            df_data = df_raw[cols_data]
-        elif self.features=='S':
-            df_data = df_raw[[self.target]]
-
-        if self.scale:
-            train_data = df_data[border1s[0]:border2s[0]]
-            self.scaler.fit(train_data.values)
-            data = self.scaler.transform(df_data.values)
-        else:
-            data = df_data.values
-            
-        df_stamp = df_raw[['date']][border1:border2]
-        df_stamp['date'] = pd.to_datetime(df_stamp.date)
-        data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
-
-        self.data_x = data[border1:border2]
-        if self.inverse:
-            self.data_y = df_data.values[border1:border2]
-        else:
-            self.data_y = data[border1:border2]
-        self.data_stamp = data_stamp
-    
-    def __getitem__(self, index):
-        s_begin = index
-        s_end = s_begin + self.seq_len
-        r_begin = s_end - self.label_len 
-        r_end = r_begin + self.label_len + self.pred_len
-
-        seq_x = self.data_x[s_begin:s_end]
-        if self.inverse:
-            seq_y = np.concatenate([self.data_x[r_begin:r_begin+self.label_len], self.data_y[r_begin+self.label_len:r_end]], 0)
-        else:
-            seq_y = self.data_y[r_begin:r_end]
-        seq_x_mark = self.data_stamp[s_begin:s_end]
-        seq_y_mark = self.data_stamp[r_begin:r_end]
-
-        return seq_x, seq_y, seq_x_mark, seq_y_mark
-    
-    def __len__(self):
-        return len(self.data_x) - self.seq_len- self.pred_len + 1
-
-    def inverse_transform(self, data):
-        return self.scaler.inverse_transform(data)
-
-class Dataset_ETT_minute(Dataset):
-    def __init__(self, root_path, flag='train', size=None, 
-                 features='S', data_path='ETTm1.csv', 
-                 target='OT', scale=True, inverse=False, timeenc=0, freq='t', cols=None):
-        # size [seq_len, label_len, pred_len]
-        # info
-        if size == None:
-            self.seq_len = 24*4*4
-            self.label_len = 24*4
-            self.pred_len = 24*4
-        else:
-            self.seq_len = size[0]
-            self.label_len = size[1]
-            self.pred_len = size[2]
-        # init
-        assert flag in ['train', 'test', 'val']
-        type_map = {'train':0, 'val':1, 'test':2}
-        self.set_type = type_map[flag]
-        
-        self.features = features
-        self.target = target
-        self.scale = scale
-        self.inverse = inverse
-        self.timeenc = timeenc
-        self.freq = freq
-        
-        self.root_path = root_path
-        self.data_path = data_path
-        self.__read_data__()
-
-    def __read_data__(self):
-        self.scaler = StandardScaler()
-        df_raw = pd.read_csv(os.path.join(self.root_path,
-                                          self.data_path))
-
-        border1s = [0, 12*30*24*4 - self.seq_len, 12*30*24*4+4*30*24*4 - self.seq_len]
-        border2s = [12*30*24*4, 12*30*24*4+4*30*24*4, 12*30*24*4+8*30*24*4]
-        border1 = border1s[self.set_type]
-        border2 = border2s[self.set_type]
-        
-        if self.features=='M' or self.features=='MS':
-            cols_data = df_raw.columns[1:]
-            df_data = df_raw[cols_data]
-        elif self.features=='S':
-            df_data = df_raw[[self.target]]
-
-        if self.scale:
-            train_data = df_data[border1s[0]:border2s[0]]
-            self.scaler.fit(train_data.values)
-            data = self.scaler.transform(df_data.values)
-        else:
-            data = df_data.values
-            
-        df_stamp = df_raw[['date']][border1:border2]
-        df_stamp['date'] = pd.to_datetime(df_stamp.date)
-        data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
-        
-        self.data_x = data[border1:border2]
-        if self.inverse:
-            self.data_y = df_data.values[border1:border2]
-        else:
-            self.data_y = data[border1:border2]
-        self.data_stamp = data_stamp
-    
-    def __getitem__(self, index):
-        s_begin = index
-        s_end = s_begin + self.seq_len
-        r_begin = s_end - self.label_len
-        r_end = r_begin + self.label_len + self.pred_len
-
-        seq_x = self.data_x[s_begin:s_end]
-        if self.inverse:
-            seq_y = np.concatenate([self.data_x[r_begin:r_begin+self.label_len], self.data_y[r_begin+self.label_len:r_end]], 0)
-        else:
-            seq_y = self.data_y[r_begin:r_end]
-        seq_x_mark = self.data_stamp[s_begin:s_end]
-        seq_y_mark = self.data_stamp[r_begin:r_end]
-
-        return seq_x, seq_y, seq_x_mark, seq_y_mark
-    
-    def __len__(self):
-        return len(self.data_x) - self.seq_len - self.pred_len + 1
-
-    def inverse_transform(self, data):
-        return self.scaler.inverse_transform(data)
-
-
-class Dataset_Custom(Dataset):
-    def __init__(self, root_path, flag='train', size=None, train_val_test_split = [0.7, 0.15, 0.15],
+class Dataset_Informer(Dataset):
+    def __init__(self, root_path, flag='train', size=None, data_split_ratio = [0.7, 0.15, 0.15],
                  features='S', data_path='ETTh1.csv', 
                  target='capacity_price', scale='standard', inverse=False, timeenc=0, freq='h', cols=None):
         # size [seq_len, label_len, pred_len]
@@ -219,7 +46,7 @@ class Dataset_Custom(Dataset):
         self.cols=cols
         self.root_path = root_path
         self.data_path = data_path
-        self.train_val_test_split = train_test_split
+        self.data_split_ratio = data_split_ratio
         self.__read_data__()
 
     def __read_data__(self):
@@ -251,11 +78,11 @@ class Dataset_Custom(Dataset):
         #     cols = list(df_raw.columns); cols.remove(self.target); cols.remove('date')
         # df_raw = df_raw[['date']+self.cols+[self.target]]
         
-        assert sum(self.train_val_test_split) == 1.0
+        assert sum(self.data_split_ratio) == 1.0
         
         # This is the number of sequences we are getting from the input time series
-        num_test = int(len(df_raw)*self.train_val_test_split[2]) - self.pred_len
-        num_vali = int(len(df_raw)*self.train_val_test_split[1])
+        num_test = int(len(df_raw)*self.data_split_ratio[2]) - self.pred_len
+        num_vali = int(len(df_raw)*self.data_split_ratio[1])
         num_train = len(df_raw) - num_vali - num_test - self.seq_len - self.pred_len
         
         if self.scale == 'standard':
@@ -486,7 +313,7 @@ class Dataset_SRL_XGBoost():
         self.val, self.test = train_test_split(temp, test_size=0.5)
         
 class Dataset_XGB(Dataset):
-    def __init__(self, root_path, flag='train', size=None, train_val_test_split = [0.7, 0.15, 0.15],
+    def __init__(self, root_path, flag='train', size=None, data_split_ratio = [0.7, 0.15, 0.15],
                  features='S', data_path='ETTh1.csv', 
                  target='capacity_price', scale='standard', inverse=False, timeenc=0, freq='d', cols=None):
         # size [seq_len, label_len, pred_len]
@@ -515,7 +342,7 @@ class Dataset_XGB(Dataset):
         self.cols=cols
         self.root_path = root_path
         self.data_path = data_path
-        self.train_val_test_split = train_val_test_split
+        self.data_split_ratio = data_split_ratio
         self.__read_data__()
 
     def __read_data__(self):
@@ -551,11 +378,11 @@ class Dataset_XGB(Dataset):
         # df_raw = df_raw[['date']+self.cols+[self.target]]
         
         # This is the number of sequences we are getting from the input time series
-        assert sum(self.train_val_test_split) == 1.0
+        assert sum(self.data_split_ratio) == 1.0
         
         # This is the number of sequences we are getting from the input time series
-        num_test = int(len(df_raw)*self.train_val_test_split[2]) - self.target_len
-        num_vali = int(len(df_raw)*self.train_val_test_split[1])
+        num_test = int(len(df_raw)*self.data_split_ratio[2]) - self.target_len
+        num_vali = int(len(df_raw)*self.data_split_ratio[1])
         num_train = len(df_raw) - num_vali - num_test - self.input_len - self.target_len
         
         if self.scale == 'standard':
@@ -585,23 +412,14 @@ class Dataset_XGB(Dataset):
         # Subset sequences according to data type (train val test)
         self.seqs_x = self.seqs_x[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
         self.seqs_y  = self.seqs_y[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
+        
+        self.matrix_x = np.array(self.seqs_x).reshape(-1, self.input_len)
+        self.matrix_y = np.array(self.seqs_y).reshape(-1, self.target_len)
+        
         self.seqs_x_mark = self.seqs_x_mark[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
         self.seqs_y_mark = self.seqs_y_mark[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
         self.seqs_x_date = self.seqs_x_date[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
         self.seqs_y_date = self.seqs_y_date[idx_seqs[self.set_type]:idx_seqs[self.set_type+1]]
-        
-        # border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]
-        # border2s = [num_train, num_train+num_vali, len(df_raw)]
-        # border1 = border1s[self.set_type]
-        # border2 = border2s[self.set_type]
-        
-        # self.data_x = data[border1:border2]
-        
-        # if self.inverse:
-        #     self.data_y = df_data.values[border1:border2]
-        # else:
-        #     self.data_y = data[border1:border2]
-        # self.data_stamp = data_stamp
         
         self.start_date_x = self.seqs_x_date[0].iloc[0]
         self.end_date_x = self.seqs_x_date[-1].iloc[-1]

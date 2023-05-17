@@ -1,4 +1,4 @@
-from data.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred
+from data.data_loader import Dataset_Informer, Dataset_Pred
 from exp.exp_basic import Exp_Basic
 from models.model import Informer, InformerStack
 from utils.postprocessing import ProcessedResult
@@ -69,14 +69,14 @@ class Exp_Informer(Exp_Basic):
         #     'ETTh2':Dataset_ETT_hour,
         #     'ETTm1':Dataset_ETT_minute,
         #     'ETTm2':Dataset_ETT_minute,
-        #     'WTH':Dataset_Custom,
-        #     'ECL':Dataset_Custom,
-        #     'Solar':Dataset_Custom,
-        #     'custom':Dataset_Custom,
+        #     'WTH':Dataset_Informer,
+        #     'ECL':Dataset_Informer,
+        #     'Solar':Dataset_Informer,
+        #     'custom':Dataset_Informer,
         # }
         # Data = data_dict[self.args.data]
         
-        Data = Dataset_Custom
+        Data = Dataset_Informer
         
         timeenc = 0 if args.embed!='timeF' else 1
 

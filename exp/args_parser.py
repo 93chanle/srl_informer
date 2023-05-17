@@ -28,7 +28,8 @@ def args_parsing():
 
     parser.add_argument('--timestamp', type=str, default=now)
     
-    parser.add_argument('--root_path', type=str, default= 'C:\\codes\\srl_informer\\data\\processed\\SRL\\', help='root path of the data file')
+    # C:\\codes\\srl_informer\\
+    parser.add_argument('--root_path', type=str, default= 'data\\processed\\SRL\\', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='SRL_NEG_00_04.csv', help='data file')    
     parser.add_argument('--features', type=str, default='S', help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
     parser.add_argument('--cols', type=str, nargs='+', help='external col names from the data files as the additional input features (not including target)')
@@ -121,6 +122,7 @@ def args_parsing():
     if args.features == 'MS' and args.cols is None:
         args.cols = ['gas', 'coal']
 
+    args.root_path = os.path.normpath(args.root_path)
 
     print('Args in experiment:')
     print(args)

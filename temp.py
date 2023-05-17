@@ -9,7 +9,7 @@ from datetime import datetime
 now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
 from exp.exp_informer import Exp_Informer
-from data.data_loader import Dataset_Custom, Dataset_XGB
+from data.data_loader import Dataset_Informer, Dataset_XGB
 
 root_path = os.path.normpath("data/dummy_dataset")
 

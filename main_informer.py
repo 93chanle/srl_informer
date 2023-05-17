@@ -9,13 +9,13 @@ from datetime import datetime
 now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
 from exp.exp_informer import Exp_Informer
-from utils.metrics import WeightedRMSE
-from data.data_loader import Dataset_Custom
 
 from exp.args_parser import args_parsing
 
+# Parsing args
 args = args_parsing()
 
+# Create experiment
 Exp = Exp_Informer
 
 for ii in range(args.itr):
