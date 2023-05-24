@@ -24,7 +24,7 @@ def args_parsing():
 
     parser.add_argument('--seq_len', type=int, default=4, help='input sequence length of Informer encoder')
     parser.add_argument('--label_len', type=int, default=3, help='start token length of Informer decoder')
-    parser.add_argument('--pred_len', type=int, default=2, help='prediction sequence length')
+    parser.add_argument('--pred_len', type=int, default=1, help='prediction sequence length')
 
     parser.add_argument('--timestamp', type=str, default=now)
     
@@ -122,7 +122,7 @@ def args_parsing():
     if args.features == 'MS' and args.cols is None:
         args.cols = ['gas', 'coal']
 
-    args.root_path = os.path.normpath(args.root_path)
+    args.root_path = os.path.abspath(args.root_path)
 
     print('Args in experiment:')
     print(args)
