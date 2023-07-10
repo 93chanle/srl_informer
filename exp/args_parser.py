@@ -6,6 +6,8 @@ import torch
 import numpy as np
 from datetime import datetime
 
+debug = False
+
 def args_parsing():
 
     now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
@@ -44,21 +46,36 @@ def args_parsing():
 
     # Informer decoder input: concat[start token series(label_len), zero padding series(pred_len)]
 
+    # Input size (starts encoding) (also relates to number of input features)
+    # Case of univariate := 1, only SRL price
     parser.add_argument('--enc_in', type=int, default=1, help='encoder input size')
     parser.add_argument('--dec_in', type=int, default=1, help='decoder input size')
+    
+    # Output size (for what?)
     parser.add_argument('--c_out', type=int, default=1, help='output size')
+    
+    # Dim of model
     parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
+    
+    # No of attention head, layers
     parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
     parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
     parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
+    
+    # Only relevant for stacked Informer
     parser.add_argument('--s_layers', type=str, default='3,2,1', help='num of stack encoder layers')
     parser.add_argument('--d_ff', type=int, default=2048, help='dimension of fcn')
     parser.add_argument('--factor', type=int, default=5, help='probsparse attn factor')
     parser.add_argument('--padding', type=int, default=0, help='padding type')
+    
+    # Testing the distil feature?
     parser.add_argument('--distil', action='store_false', help='whether to use distilling in encoder, using this argument means not using distilling', default=True)
     parser.add_argument('--dropout', type=float, default=0.05, help='dropout')
+
     parser.add_argument('--attn', type=str, default='prob', help='attention used in encoder, options:[prob, full]')
     parser.add_argument('--embed', type=str, default='timeF', help='time features encoding, options:[timeF, fixed, learned]')
+    
+    
     parser.add_argument('--activation', type=str, default='gelu',help='activation')
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
@@ -81,8 +98,22 @@ def args_parsing():
     # FOR TUNING
     parser.add_argument('--tune_num_samples', type=int, default=200, help='Number of sample interations in hyperparameter tuning')
 
-    args = parser.parse_args()
-
+    args = parser.parse_args("")
+    
+    if debug:
+        args.data = 'SRL_NEG_00_04_dummy'
+        args.loss = 'rmse'
+        args.seq_len = 4
+        args.label_len = 3
+        args.pred_len = 1
+        args.d_model = 16
+        args.d_ff = 10
+        args.data_path = 'SRL_NEG_00_04_dummy.csv'
+        args.itr = 1
+        args.train_epochs = 3
+        args.scale = 'none'
+        args.factor = 1
+        
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
     if args.use_gpu and args.use_multi_gpu:

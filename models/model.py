@@ -8,7 +8,6 @@ from models.decoder import Decoder, DecoderLayer
 from models.attn import FullAttention, ProbAttention, AttentionLayer
 from models.embed import DataEmbedding
 
-from darts.models.forecasting.xgboost import XGBModel
 
 class Informer(nn.Module):
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len, 
@@ -17,34 +16,61 @@ class Informer(nn.Module):
                 output_attention = False, distil=True, mix=True,
                 device=torch.device('cuda:0')):
         super(Informer, self).__init__()
+        
         self.pred_len = out_len
         self.attn = attn
         self.output_attention = output_attention
 
         # Encoding
-        self.enc_embedding = DataEmbedding(enc_in, d_model, embed, freq, dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, embed, freq, dropout)
+        self.enc_embedding = DataEmbedding(c_in=enc_in, 
+                                           d_model=d_model, 
+                                           embed_type=embed, 
+                                           freq=freq, 
+                                           dropout=dropout)
+        
+        self.dec_embedding = DataEmbedding(c_in=dec_in,
+                                           d_model=d_model, 
+                                           embed_type=embed, 
+                                           freq=freq, 
+                                           dropout=dropout)
         # Attention
         Attn = ProbAttention if attn=='prob' else FullAttention
         # Encoder
         self.encoder = Encoder(
             [
                 EncoderLayer(
-                    AttentionLayer(Attn(False, factor, attention_dropout=dropout, output_attention=output_attention), 
-                                d_model, n_heads, mix=False),
+                    
+                    AttentionLayer(
+                        
+                        Attn(
+                            mask_flag=False, 
+                            factor=factor, 
+                            attention_dropout=dropout, 
+                            output_attention=output_attention
+                            ), 
+                        
+                        d_model, n_heads, mix=False
+                        ),
+                    
                     d_model,
                     d_ff,
                     dropout=dropout,
                     activation=activation
-                ) for l in range(e_layers)
+                    
+                ) for l in range(e_layers) # EncoderLayer = ConvLayer + 1
             ],
+            
             [
                 ConvLayer(
                     d_model
                 ) for l in range(e_layers-1)
+                
             ] if distil else None,
+            
             norm_layer=torch.nn.LayerNorm(d_model)
+            
         )
+        
         # Decoder
         self.decoder = Decoder(
             [
@@ -68,7 +94,11 @@ class Informer(nn.Module):
         
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, 
                 enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
+        
+        # Embedding
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
+        # enc_out is shape [batch_size, enc_len, d_model]
+        
         enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
 
         dec_out = self.dec_embedding(x_dec, x_mark_dec)

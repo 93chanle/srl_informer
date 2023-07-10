@@ -20,9 +20,11 @@ class ProcessedResult():
         
     
     def convert_seq(self, seq_raw, inverse=True):
-        if inverse: 
+        
+        if self.args.scale != 'none' and inverse == True: 
             seq = self.data.scaler.inverse_transform(seq_raw)
         else: seq = seq_raw
+        
         
         if seq.shape[1] == 1:
             return pd.Series(seq.mean(1).squeeze())

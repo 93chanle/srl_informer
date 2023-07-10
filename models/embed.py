@@ -21,12 +21,15 @@ class PositionalEmbedding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        return self.pe[:, :x.size(1)]
+        return self.pe[:, :x.size(1)] # same as [:, :x.size(1), :]
 
 class TokenEmbedding(nn.Module):
     def __init__(self, c_in, d_model):
         super(TokenEmbedding, self).__init__()
         padding = 1 if torch.__version__>='1.5.0' else 2
+        
+        # in_channels: no of input channels = features in data, univariate SRL price :=1
+        # out_channels: no. of filters applied to input, dimensionality of the embedded data
         self.tokenConv = nn.Conv1d(in_channels=c_in, out_channels=d_model, 
                                     kernel_size=3, padding=padding, padding_mode='circular')
         for m in self.modules():
@@ -34,8 +37,8 @@ class TokenEmbedding(nn.Module):
                 nn.init.kaiming_normal_(m.weight,mode='fan_in',nonlinearity='leaky_relu')
 
     def forward(self, x):
-        x = self.tokenConv(x.permute(0, 2, 1)).transpose(1,2)
-        return x
+        result = self.tokenConv(x.permute(0, 2, 1)).transpose(1,2)
+        return result
 
 class FixedEmbedding(nn.Module):
     def __init__(self, c_in, d_model):
@@ -104,6 +107,10 @@ class DataEmbedding(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
-        x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+        value_embedding = self.value_embedding(x)
+        position_embedding = self.position_embedding(x)
+        temporal_embedding = self.temporal_embedding(x_mark)
+        
+        x = value_embedding + position_embedding + temporal_embedding
         
         return self.dropout(x)

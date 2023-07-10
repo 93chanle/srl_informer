@@ -59,6 +59,10 @@ class Exp_Informer(Exp_Basic):
         
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
+        
+        # Save model structure 
+
+        
         return model
 
     def _get_data(self, flag):
@@ -104,7 +108,7 @@ class Exp_Informer(Exp_Basic):
         )
         
         # PRINTSTAT
-        print(flag, len(data_set))
+        # print(flag, len(data_set))
         
         data_loader = DataLoader(
             data_set,
@@ -215,6 +219,8 @@ class Exp_Informer(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
+            
+            # Fore reporting of linlin loss
             if self.args.loss == 'linlin': percentile = [] 
             
             self.model.train()
@@ -390,13 +396,32 @@ class Exp_Informer(Exp_Basic):
                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
             else:
                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+           
+        # For dummy dataset: get batch_input for later debugging        
+        # batch_input = tuple([batch_x, batch_x_mark, dec_inp, batch_y_mark])
+        
+        # # Export ONNX model architecture
+        # torch.onnx.export(self.model,         # model being run 
+        #     batch_input,       # model input (or a tuple for multiple inputs) 
+        #     "Informer.onnx",       # where to save the model  
+        #     export_params=True,  # store the trained parameter weights inside the model file 
+        #     opset_version=11,    # the ONNX version to export the model to 
+        #     # do_constant_folding=True,  # whether to execute constant folding for optimization 
+        #     input_names = ['modelInput'],   # the model's input names 
+        #     output_names = ['modelOutput'], # the model's output names 
+        #     # dynamic_axes={'modelInput' : {0 : 'batch_size'},    # variable length axes 
+        #     #                         'modelOutput' : {0 : 'batch_size'}}
+        #     ) 
+        
+        # with open('data\\dummy_dataset\\batch_input.pkl', 'wb') as f:
+        #     pkl.dump(batch_input, f)
+                
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
         f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
 
         return outputs, batch_y
-    
     
     def tune(self):
             

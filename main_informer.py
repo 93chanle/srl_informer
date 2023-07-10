@@ -12,11 +12,15 @@ from exp.exp_informer import Exp_Informer
 
 from exp.args_parser import args_parsing
 
+# For saving model structure
+import torch.onnx
+
 # Parsing args
 args = args_parsing()
 
 # Create experiment
 Exp = Exp_Informer
+print('Created Informer experiment')
 
 for ii in range(args.itr):
     # setting record of experiments
@@ -26,7 +30,16 @@ for ii in range(args.itr):
                 args.embed, args.distil, args.mix, args.des, ii)
 
     exp = Exp(args) # set experiments
+    
+    # Export for debugging
+    # import pickle as pkl
+    # with open('data\\dummy_dataset\\dummy_model.pkl', 'wb') as f:
+    #     pkl.dump(exp, f)
+    # with open('data\\dummy_dataset\\dummy_model_args.pkl', 'wb') as f:
+    #     pkl.dump(args, f)
+        
     print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+
     exp.train(setting)
     
     print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
@@ -35,7 +48,7 @@ for ii in range(args.itr):
     
     # exp.report_tune(vali_data, vali_loader, criterion)
     
-    exp.test(setting)
+    # exp.test(setting)
 
     if args.do_predict:
         print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))

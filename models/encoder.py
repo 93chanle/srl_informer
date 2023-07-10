@@ -24,6 +24,7 @@ class ConvLayer(nn.Module):
         return x
 
 class EncoderLayer(nn.Module):
+    
     def __init__(self, attention, d_model, d_ff=None, dropout=0.1, activation="relu"):
         super(EncoderLayer, self).__init__()
         d_ff = d_ff or 4*d_model
@@ -33,6 +34,7 @@ class EncoderLayer(nn.Module):
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout)
+        
         self.activation = F.relu if activation == "relu" else F.gelu
 
     def forward(self, x, attn_mask=None):
@@ -42,10 +44,10 @@ class EncoderLayer(nn.Module):
         #     attn_mask = attn_mask
         # ))
         new_x, attn = self.attention(
-            x, x, x,
+            queries=x, keys=x, values=x,
             attn_mask = attn_mask
         )
-        x = x + self.dropout(new_x)
+        x = x + self.dropout(new_x) # Skip connections?
 
         y = x = self.norm1(x)
         y = self.dropout(self.activation(self.conv1(y.transpose(-1,1))))
@@ -62,14 +64,20 @@ class Encoder(nn.Module):
 
     def forward(self, x, attn_mask=None):
         # x [B, L, D]
-        attns = []
+        attns = [] # all attn in the encoders are here
         if self.conv_layers is not None:
+            
             for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
+                
+                # Each time passed through attn layer then conv layer
                 x, attn = attn_layer(x, attn_mask=attn_mask)
                 x = conv_layer(x)
                 attns.append(attn)
+                
+            # In the end passed one more time through attn layer
             x, attn = self.attn_layers[-1](x, attn_mask=attn_mask)
             attns.append(attn)
+            
         else:
             for attn_layer in self.attn_layers:
                 x, attn = attn_layer(x, attn_mask=attn_mask)

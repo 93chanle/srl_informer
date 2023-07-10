@@ -20,6 +20,8 @@ class FullAttention(nn.Module):
         _, S, _, D = values.shape
         scale = self.scale or 1./sqrt(E)
 
+        # Einstein summation notation
+        # Doing matrix mul for multi-dim matrices
         scores = torch.einsum("blhe,bshe->bhls", queries, keys)
         if self.mask_flag:
             if attn_mask is None:
@@ -27,6 +29,8 @@ class FullAttention(nn.Module):
 
             scores.masked_fill_(attn_mask.mask, -np.inf)
 
+        # Dropout, values with higher scores has higher chances
+        # Dropout on S dim
         A = self.dropout(torch.softmax(scale * scores, dim=-1))
         V = torch.einsum("bhls,bshd->blhd", A, values)
         
@@ -36,7 +40,13 @@ class FullAttention(nn.Module):
             return (V.contiguous(), None)
 
 class ProbAttention(nn.Module):
-    def __init__(self, mask_flag=True, factor=5, scale=None, attention_dropout=0.1, output_attention=False):
+    def __init__(self, 
+                 mask_flag=True, 
+                 factor=5, 
+                 scale=None, 
+                 attention_dropout=0.1, 
+                 output_attention=False):
+        
         super(ProbAttention, self).__init__()
         self.factor = factor
         self.scale = scale
@@ -50,9 +60,25 @@ class ProbAttention(nn.Module):
         _, _, L_Q, _ = Q.shape
 
         # calculate the sampled Q_K
-        K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E)
+        # unsqueeze adds another dimension (Q [B, H, 1, L, D])
+        # expands in 3rd dim -> broadcast [L, D] up to L_Q times
+        K_expand = K.unsqueeze(-3).expand(B, H, L_Q, L_K, E) 
+        
+        # sample indices of some sample_k elements
         index_sample = torch.randint(L_K, (L_Q, sample_k)) # real U = U_part(factor*ln(L_k))*L_q
+        
+        # Change for exporting ONNX (not support torch.randint)
+        # torch.randint(L_K, (L_Q, sample_k)) # real U = U_part(factor*ln(L_k))*L_q
+        # index_sample = torch.rand((L_Q, sample_k))
+        # index_sample = (index_sample*L_K).long()
+        
+        print('')
+        
+        # K_sample has dim [B, H, L_Q, sample_k, E]
         K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]
+        
+        # Q_K_sample has dim [B, H, L_Q, sample_k]
+        # attn scores of sampled keys with all queries
         Q_K_sample = torch.matmul(Q.unsqueeze(-2), K_sample.transpose(-2, -1)).squeeze(-2)
 
         # find the Top_k query with sparisty measurement
@@ -63,6 +89,8 @@ class ProbAttention(nn.Module):
         Q_reduce = Q[torch.arange(B)[:, None, None],
                      torch.arange(H)[None, :, None],
                      M_top, :] # factor*ln(L_q)
+        
+        # Q_K has dim [B, H, n_top, L_K]
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1)) # factor*ln(L_q)*L_k
 
         return Q_K, M_top
@@ -105,12 +133,20 @@ class ProbAttention(nn.Module):
         keys = keys.transpose(2,1)
         values = values.transpose(2,1)
 
-        U_part = self.factor * np.ceil(np.log(L_K)).astype('int').item() # c*ln(L_k)
+        # If self-attention: U_part seems to = u
+        # U_part: original paper says L_k*ln(L_q), change here
+        # U_part = self.factor * np.ceil(np.log(L_K)).astype('int').item() # c*ln(L_k)
+        U_part = L_K * np.ceil(np.log(L_Q)).astype('int').item() # c*ln(L_k)
+        
         u = self.factor * np.ceil(np.log(L_Q)).astype('int').item() # c*ln(L_q) 
+        
+        #U_part = self.factor * np.ceil(np.log(L_K)).item() # c*ln(L_k)
+        #u = self.factor * np.ceil(np.log(L_Q)).item() # c*ln(L_q) 
 
         U_part = U_part if U_part<L_K else L_K
         u = u if u<L_Q else L_Q
         
+        # scores_top: attn of top M, has dim [B, H, n_top, L_K]
         scores_top, index = self._prob_QK(queries, keys, sample_k=U_part, n_top=u) 
 
         # add scale factor
@@ -146,6 +182,7 @@ class AttentionLayer(nn.Module):
         _, S, _ = keys.shape
         H = self.n_heads
 
+        # Here, input dims + 1, reflecting attention heads
         queries = self.query_projection(queries).view(B, L, H, -1)
         keys = self.key_projection(keys).view(B, S, H, -1)
         values = self.value_projection(values).view(B, S, H, -1)
@@ -158,6 +195,8 @@ class AttentionLayer(nn.Module):
         )
         if self.mix:
             out = out.transpose(2,1).contiguous()
+            
+        # This is the concatenation step to merge all heads
         out = out.view(B, L, -1)
 
         return self.out_projection(out), attn
