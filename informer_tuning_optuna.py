@@ -116,7 +116,7 @@ import sys
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
 study_name = f"{args.data}_tune_informer"  # Unique identifier of the study.
-storage_name = "sqlite:///{}.db".format(study_name)
+storage_name = "sqlite:///optuna_studies/{}.db".format(study_name)
 study = optuna.create_study(study_name=study_name, storage=storage_name,
                             directions=['minimize', 'maximize'],
                             sampler=optuna.samplers.TPESampler(seed=11),

@@ -96,7 +96,7 @@ def args_parsing():
     parser.add_argument('--devices', type=str, default='0,1,2,3',help='device ids of multile gpus')
     
     # FOR TUNING
-    parser.add_argument('--tune_num_samples', type=int, default=200, help='Number of sample interations in hyperparameter tuning')
+    parser.add_argument('--tune_num_samples', type=int, default=40, help='Number of sample interations in hyperparameter tuning')
 
     args = parser.parse_args("")
     
