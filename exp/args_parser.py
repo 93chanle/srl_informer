@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from datetime import datetime
 
-debug = False
+debug = True
 
 def args_parsing():
 
@@ -101,6 +101,7 @@ def args_parsing():
     args = parser.parse_args("")
     
     if debug:
+        args.root_path='data\\dummy_dataset\\'
         args.data = 'SRL_NEG_00_04_dummy'
         args.loss = 'rmse'
         args.seq_len = 4
@@ -113,6 +114,7 @@ def args_parsing():
         args.train_epochs = 3
         args.scale = 'none'
         args.factor = 1
+        args.batch_size = 6
         
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
@@ -157,7 +159,6 @@ def args_parsing():
 
     print('Args in experiment:')
     print(args)
-    print('')
     return args
 
 # with open("args.yaml", "w") as f:

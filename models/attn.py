@@ -70,10 +70,7 @@ class ProbAttention(nn.Module):
         # Change for exporting ONNX (not support torch.randint)
         # torch.randint(L_K, (L_Q, sample_k)) # real U = U_part(factor*ln(L_k))*L_q
         # index_sample = torch.rand((L_Q, sample_k))
-        # index_sample = (index_sample*L_K).long()
-        
-        print('')
-        
+        # index_sample = (index_sample*L_K).long()        
         # K_sample has dim [B, H, L_Q, sample_k, E]
         K_sample = K_expand[:, :, torch.arange(L_Q).unsqueeze(1), index_sample, :]
         

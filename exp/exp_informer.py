@@ -3,7 +3,7 @@ from exp.exp_basic import Exp_Basic
 from models.model import Informer, InformerStack
 from utils.postprocessing import ProcessedResult
 
-from utils.tools import EarlyStopping, adjust_learning_rate, EarlyStoppingNoSaveModel
+from utils.tools import EarlyStopping, adjust_learning_rate, EarlyStoppingNoSaveModel, p
 from utils.metrics import metric, WeightedRMSE, weighted_RMSE, LinExLoss, LinLinLoss
 
 import numpy as np
@@ -18,6 +18,8 @@ import time
 import matplotlib.pyplot as plt
 
 import pickle as pkl
+
+from utils.tools import p
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -196,6 +198,8 @@ class Exp_Informer(Exp_Basic):
         return total_loss, predicted_revenue
 
     def train(self, setting):
+        
+        p('Prepare all data')
         train_data, train_loader = self._get_data(flag = 'train')
         vali_data, vali_loader = self._get_data(flag = 'val')
         test_data, test_loader = self._get_data(flag = 'test')
@@ -216,7 +220,9 @@ class Exp_Informer(Exp_Basic):
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
 
+        p('Start looping epochs...')
         for epoch in range(self.args.train_epochs):
+            p(f'Epoch {epoch}...')
             iter_count = 0
             train_loss = []
             
@@ -225,12 +231,14 @@ class Exp_Informer(Exp_Basic):
             
             self.model.train()
             epoch_time = time.time()
+            p('Start looping batches...')
             for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(train_loader):
                 iter_count += 1
                 
                 model_optim.zero_grad()
                 
                 # TRAIN HERE
+                p(f'Processing batch {i}')
                 pred, true = self._process_one_batch(
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                              
@@ -371,6 +379,8 @@ class Exp_Informer(Exp_Basic):
         return
 
     def _process_one_batch(self, dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark):
+        
+        p('Prepare batch data')
         batch_x = batch_x.float().to(self.device)
         batch_y = batch_y.float() # .to(self.device)
 
@@ -384,6 +394,7 @@ class Exp_Informer(Exp_Basic):
             dec_inp = torch.ones([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
         dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)
         
+        p('Get batch result')
         # encoder - decoder
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
@@ -415,12 +426,12 @@ class Exp_Informer(Exp_Basic):
         
         # with open('data\\dummy_dataset\\batch_input.pkl', 'wb') as f:
         #     pkl.dump(batch_input, f)
-                
+        p('Concat batch')        
         if self.args.inverse:
             outputs = dataset_object.inverse_transform(outputs)
         f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
-
+        p('Finish batch!')
         return outputs, batch_y
     
     def tune(self):

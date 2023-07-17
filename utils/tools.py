@@ -211,3 +211,9 @@ def convert_ONNX(model):
                                 'modelOutput' : {0 : 'batch_size'}}) 
     print(" ") 
     print('Model has been converted to ONNX')
+
+
+# Print debug when needed    
+def p(message, print_mess = False):
+    if print_mess:
+        print(message)
