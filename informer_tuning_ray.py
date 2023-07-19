@@ -17,8 +17,6 @@ now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
 Exp = Exp_Informer
 
-
-
 ### TUNING 
 
 # Define search space
@@ -112,7 +110,7 @@ tuner = tune.Tuner(
         trial_dirname_creator=my_trial_dirname_creator,
     ),
     run_config=air.RunConfig(
-        name=f'tune_{args.data}_{now}',
+        name=f'tune_{args.data}_{args.loss}_{now}',
         local_dir='ray_tune/',
         stop={"training_iteration": 100},
         checkpoint_config=air.CheckpointConfig(
