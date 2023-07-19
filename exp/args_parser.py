@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from datetime import datetime
 
-debug = True
+debug = False
 
 def args_parsing():
 
@@ -98,7 +98,7 @@ def args_parsing():
     # FOR TUNING
     parser.add_argument('--tune_num_samples', type=int, default=40, help='Number of sample interations in hyperparameter tuning')
 
-    args = parser.parse_args("")
+    args = parser.parse_args()
     
     if debug:
         args.root_path='data\\dummy_dataset\\'

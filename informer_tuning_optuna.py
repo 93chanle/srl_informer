@@ -118,11 +118,12 @@ optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout)
 study_name = f"tune_informer_{args.data}_{args.loss}"  # Unique identifier of the study.
 storage_name = "sqlite:///optuna_studies/{}.db".format(study_name)
 study = optuna.create_study(study_name=study_name, storage=storage_name,
+                            load_if_exists=True,
                             directions=['minimize', 'maximize'],
                             sampler=optuna.samplers.TPESampler(seed=11),
                             )
 
-study.optimize(objective, n_trials=args.tune_num_samples, timeout=600, catch=[Exception])
+study.optimize(objective, n_trials=100, catch=[Exception])
 
 # study = optuna.create_study(
 #     directions=['minimize', 'maximize'],
