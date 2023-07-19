@@ -70,15 +70,15 @@ def objective(trial):
             args.linlin_weight = trial.suggest_float('linlin_weight', 0.05, 0.45, step=0.005)
     
     args.learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
-    args.train_epochs = trial.suggest_int("train_epochs", 3, 6)
-    args.seq_len = trial.suggest_int('seq_len', 49, 112, step=7)
+    args.train_epochs = trial.suggest_int("train_epochs", 6, 14)
+    args.seq_len = trial.suggest_int('seq_len', 56, 112, step=7)
     label_seq_len_ratio = trial.suggest_float('label_seq_len_ratio', 0.4, 0.8, step=0.025)
     args.label_len = min(int(label_seq_len_ratio * args.seq_len), 77)
     args.e_layers = trial.suggest_int('e_layers', 2, 7)
     args.d_layers = trial.suggest_int('d_layers', 1, 4)
     args.n_heads = trial.suggest_int('n_heads', 4, 32, step=4)
-    args.d_model = trial.suggest_int('d_model', 1024, 2048, step=256)
-    args.batch_size = trial.suggest_int('batch_size', 16, 64, step=8)
+    args.d_model = trial.suggest_int('d_model', 128, 1024, step=128)
+    args.batch_size = trial.suggest_int('batch_size', 8, 32, step=8)
     
     # args.n_estimators = trial.suggest_int("n_estimators", 10, 100)
     # args.max_depth = trial.suggest_int("max_depth", 3, 12)
@@ -96,7 +96,7 @@ def objective(trial):
     
     torch.cuda.empty_cache()
     
-    # if trial.should_prune():
+    # if trial.should_prune():s
     #     raise optuna.TrialPruned()
     
     # # Add a callback for pruning.
@@ -115,14 +115,14 @@ import sys
 
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
-study_name = f"tune_informer_{args.data}_{args.loss}"  # Unique identifier of the study.
+study_name = f"tune_informer_{args.data}_{args.loss}_{now}"  # Unique identifier of the study.
 storage_name = "sqlite:///optuna_studies/{}.db".format(study_name)
 study = optuna.create_study(study_name=study_name, storage=storage_name,
                             directions=['minimize', 'maximize'],
-                            sampler=optuna.samplers.TPESampler(seed=11),
+                            sampler=optuna.samplers.TPESampler(seed=1993),
                             )
 
-study.optimize(objective, n_trials=args.tune_num_samples, timeout=600, catch=[Exception])
+study.optimize(objective, n_trials=args.tune_num_samples, catch=[Exception])
 
 # study = optuna.create_study(
 #     directions=['minimize', 'maximize'],
