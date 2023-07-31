@@ -6,7 +6,10 @@ import torch
 import numpy as np
 from datetime import datetime
 
+
 debug = False
+debug_2 = False
+debug_3 = True
 
 def args_parsing():
 
@@ -75,7 +78,6 @@ def args_parsing():
     parser.add_argument('--attn', type=str, default='prob', help='attention used in encoder, options:[prob, full]')
     parser.add_argument('--embed', type=str, default='timeF', help='time features encoding, options:[timeF, fixed, learned]')
     
-    
     parser.add_argument('--activation', type=str, default='gelu',help='activation')
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
     parser.add_argument('--do_predict', action='store_true', help='whether to predict unseen future data')
@@ -115,6 +117,41 @@ def args_parsing():
         args.scale = 'none'
         args.factor = 1
         args.batch_size = 6
+        args.output_attention = True
+        
+    if debug_2:
+        args.data = 'SRL_NEG_00_04'
+        args.loss = 'rmse'
+        args.seq_len = 37
+        args.label_len = 5
+        args.pred_len = 1
+        args.d_model = 16
+        args.d_ff = 100
+        args.data_path = 'SRL_NEG_00_04.csv'
+        args.itr = 1
+        args.train_epochs = 3
+        args.scale = 'none'
+        args.factor = 1
+        args.batch_size = 1
+        args.output_attention = True
+        
+    if debug_3:
+        args.data = 'SRL_NEG_00_04'
+        args.loss = 'linex'
+        args.seq_len = 64
+        args.label_len = 30
+        args.pred_len = 1
+        args.d_model = 512
+        args.d_ff = 24
+        args.data_path = 'SRL_NEG_00_04.csv'
+        args.itr = 2
+        args.train_epochs = 3
+        args.scale = 'none'
+        args.factor = 4
+        args.batch_size = 32
+        args.output_attention = True
+        args.e_layers = 3
+        args.d_layers = 2
         
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 

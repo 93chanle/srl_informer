@@ -48,7 +48,7 @@ for ii in range(args.itr):
     
     # exp.report_tune(vali_data, vali_loader, criterion)
     
-    # exp.test(setting)
+    exp.test(setting, data_type='vali')
 
     if args.do_predict:
         print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))

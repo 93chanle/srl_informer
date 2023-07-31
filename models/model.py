@@ -75,12 +75,12 @@ class Informer(nn.Module):
         self.decoder = Decoder(
             [
                 DecoderLayer(
-                    AttentionLayer(Attn(True, factor, attention_dropout=dropout, output_attention=False), 
+                    self_attention=AttentionLayer(Attn(True, factor, attention_dropout=dropout, output_attention=output_attention), 
                                 d_model, n_heads, mix=mix),
-                    AttentionLayer(FullAttention(False, factor, attention_dropout=dropout, output_attention=False), 
+                    cross_attention=AttentionLayer(FullAttention(False, factor, attention_dropout=dropout, output_attention=output_attention), 
                                 d_model, n_heads, mix=False),
-                    d_model,
-                    d_ff,
+                    d_model=d_model,
+                    d_ff=d_ff,
                     dropout=dropout,
                     activation=activation,
                 )
@@ -99,14 +99,19 @@ class Informer(nn.Module):
         enc_out = self.enc_embedding(x_enc, x_mark_enc)
         # enc_out is shape [batch_size, enc_len, d_model]
         
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
+        enc_out, enc_attns = self.encoder(enc_out, attn_mask=enc_self_mask)
 
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
+        dec_out, dec_self_attn, dec_cross_attn = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
         dec_out = self.projection(dec_out)
         
         # dec_out = self.end_conv1(dec_out)
         # dec_out = self.end_conv2(dec_out.transpose(2,1)).transpose(1,2)
+        
+        attns = dict(enc_attns=enc_attns,
+                     dec_self_attn=dec_self_attn,
+                     dec_cross_attn=dec_cross_attn)
+        
         if self.output_attention:
             return dec_out[:,-self.pred_len:,:], attns
         else:

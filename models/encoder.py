@@ -64,14 +64,14 @@ class Encoder(nn.Module):
 
     def forward(self, x, attn_mask=None):
         # x [B, L, D]
-        attns = [] # all attn in the encoders are here
+        attns = [] # all attn in the encoders are here, amount = encoder_layers
         if self.conv_layers is not None:
             
             for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
                 
                 # Each time passed through attn layer then conv layer
                 x, attn = attn_layer(x, attn_mask=attn_mask)
-                x = conv_layer(x)
+                x = conv_layer(x) # this makes the dimensionality different
                 attns.append(attn)
                 
             # In the end passed one more time through attn layer

@@ -87,16 +87,23 @@ class ProbAttention(nn.Module):
                      torch.arange(H)[None, :, None],
                      M_top, :] # factor*ln(L_q)
         
-        # Q_K has dim [B, H, n_top, L_K]
+        # Q_K has dim [B, H, n_top, D] take n_top queries only, Q has dim [B, H, L, D]
         Q_K = torch.matmul(Q_reduce, K.transpose(-2, -1)) # factor*ln(L_q)*L_k
 
         return Q_K, M_top
 
     def _get_initial_context(self, V, L_Q):
+        
+        # contex contains the average feature 
+        # representation of the sequence for each batch and each head
+        # This could be used as a simplified or "compressed" representation 
+        # of the sequence information in V and might be used in some form 
+        # of attention mechanism where the sequence mean is important.
+        
         B, H, L_V, D = V.shape
         if not self.mask_flag:
             # V_sum = V.sum(dim=-2)
-            V_sum = V.mean(dim=-2)
+            V_sum = V.mean(dim=-2) # mean of second to last dimension L (sequence length)
             contex = V_sum.unsqueeze(-2).expand(B, H, L_Q, V_sum.shape[-1]).clone()
         else: # use mask
             assert(L_Q == L_V) # requires that L_Q == L_V, i.e. for self-attention only
@@ -115,6 +122,7 @@ class ProbAttention(nn.Module):
         context_in[torch.arange(B)[:, None, None],
                    torch.arange(H)[None, :, None],
                    index, :] = torch.matmul(attn, V).type_as(context_in)
+        
         if self.output_attention:
             attns = (torch.ones([B, H, L_V, L_V])/L_V).type_as(attn).to(attn.device)
             attns[torch.arange(B)[:, None, None], torch.arange(H)[None, :, None], index, :] = attn
@@ -123,7 +131,7 @@ class ProbAttention(nn.Module):
             return (context_in, None)
 
     def forward(self, queries, keys, values, attn_mask):
-        B, L_Q, H, D = queries.shape
+        B, L_Q, H, D = queries.shape # dummy dataset: 6, 4, 8, 2
         _, L_K, _, _ = keys.shape
 
         queries = queries.transpose(2,1)
@@ -175,12 +183,12 @@ class AttentionLayer(nn.Module):
         self.mix = mix
 
     def forward(self, queries, keys, values, attn_mask):
-        B, L, _ = queries.shape
+        B, L, _ = queries.shape # B, L, D
         _, S, _ = keys.shape
         H = self.n_heads
 
         # Here, input dims + 1, reflecting attention heads
-        queries = self.query_projection(queries).view(B, L, H, -1)
+        queries = self.query_projection(queries).view(B, L, H, -1) # 6, 4, 8, 2
         keys = self.key_projection(keys).view(B, S, H, -1)
         values = self.value_projection(values).view(B, S, H, -1)
 

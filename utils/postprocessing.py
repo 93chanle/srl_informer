@@ -8,10 +8,11 @@ import torch
 from utils.tools import add_line_breaks_to_args_string
 
 class ProcessedResult():
-    def __init__(self, preds, trues, args, data):
+    def __init__(self, preds, trues, attns, args, data):
         self.args = args
         self.num_pred = preds.shape[0]
         self.data = data
+        self.attns = attns
         self.pred_raw = self.convert_seq(preds, inverse=False)
         self.true_raw = self.convert_seq(trues, inverse=False)
         self.pred = self.convert_seq(preds, inverse=True)

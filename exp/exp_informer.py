@@ -144,7 +144,7 @@ class Exp_Informer(Exp_Basic):
         total_loss = []
         for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(vali_loader):
             try:
-                pred, true = self._process_one_batch(
+                pred, true, attns = self._process_one_batch(
                     vali_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                 loss = criterion(pred.detach().cpu(), true.detach().cpu())
                 loss = criterion(pred.detach().cpu(), true.detach().cpu())
@@ -239,7 +239,7 @@ class Exp_Informer(Exp_Basic):
                 
                 # TRAIN HERE
                 p(f'Processing batch {i}')
-                pred, true = self._process_one_batch(
+                pred, true, attns = self._process_one_batch(
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                              
                 if self.args.loss == 'linlin':
@@ -300,12 +300,14 @@ class Exp_Informer(Exp_Basic):
         
         preds = []
         trues = []
+        attns = []
         
         for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(test_loader):
-            pred, true = self._process_one_batch(
+            pred, true, attn = self._process_one_batch(
                 test_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             preds.append(pred.detach().cpu().numpy())
             trues.append(true.detach().cpu().numpy())
+            attns.append(attn)
 
         # preds = np.array(preds)
         # trues = np.array(trues)
@@ -332,11 +334,11 @@ class Exp_Informer(Exp_Basic):
         np.save(folder_path+'true.npy', trues)
         
         # Create result object
-        result = ProcessedResult(preds=preds, trues=trues, 
+        result = ProcessedResult(preds=preds, trues=trues, attns=attns,
                                  args=self.args,
                                  data=test_data)   
         # Dump result object
-        with open('processed_result_test.pkl', 'wb') as f:
+        with open(folder_path+'processed_result.pickle', 'wb') as f:
             pkl.dump(result, f)
         
         predicted_revenue = result.predict_revenue(result.pred)
@@ -399,12 +401,12 @@ class Exp_Informer(Exp_Basic):
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
                 if self.args.output_attention:
-                    outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    outputs, attns = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                 else:
                     outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
         else:
             if self.args.output_attention:
-                outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                outputs, attns = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
             else:
                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
            
@@ -432,7 +434,11 @@ class Exp_Informer(Exp_Basic):
         f_dim = -1 if self.args.features=='MS' else 0
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
         p('Finish batch!')
-        return outputs, batch_y
+        if self.args.output_attention:
+            return outputs, batch_y, attns
+        else:
+            return outputs, batch_y, None
+
     
     def tune(self):
             
