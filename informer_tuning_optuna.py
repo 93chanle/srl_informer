@@ -33,6 +33,7 @@ from exp.args_parser import args_parsing
 args = args_parsing()
 
 now = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+# now = ("19-07-2023_22-26-38")
 
 Exp = Exp_Informer
 
@@ -123,11 +124,7 @@ study = optuna.create_study(study_name=study_name, storage=storage_name,
                             sampler=optuna.samplers.TPESampler(seed=1993),
                             )
 
-<<<<<<< HEAD
 study.optimize(objective, n_trials=args.tune_num_samples, catch=[Exception])
-=======
-study.optimize(objective, n_trials=100, catch=[Exception])
->>>>>>> 1095294c577e4738427b6d54e02c5b0864f76858
 
 # study = optuna.create_study(
 #     directions=['minimize', 'maximize'],
