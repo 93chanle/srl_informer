@@ -7,9 +7,9 @@ import numpy as np
 from datetime import datetime
 
 
-debug = False
+debug = True
 debug_2 = False
-debug_3 = True
+debug_3 = False
 
 def args_parsing():
 
@@ -21,9 +21,9 @@ def args_parsing():
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-    parser.add_argument('--loss', type=str, default='linlin',help='customized loss functions, one of [w_rmse, linex, linlin, rmse]')
+    parser.add_argument('--loss', type=str, default='linlin',help='customized loss functions, one of [wrmse, linex, linlin, rmse]')
 
-    parser.add_argument('--w_rmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
+    parser.add_argument('--wrmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
     parser.add_argument('--linex_weight', type=float, default=0.05,help='weighted parameter for linear-exponential loss function')
     parser.add_argument('--linlin_weight', type=float, default=0.1,help='weighted parameter for linlin / pinball loss function')
 
@@ -105,7 +105,7 @@ def args_parsing():
     if debug:
         args.root_path='data\\dummy_dataset\\'
         args.data = 'SRL_NEG_00_04_dummy'
-        args.loss = 'rmse'
+        # args.loss = 'rmse'
         args.seq_len = 4
         args.label_len = 3
         args.pred_len = 1

@@ -8,5 +8,5 @@
   "n_heads": 12,
   "seq_len": 56,
   "train_epochs": 6,
-  "w_rmse_weight": 4.7
+  "wrmse_weight": 4.7
 }

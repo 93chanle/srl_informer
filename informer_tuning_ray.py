@@ -38,8 +38,8 @@ search_space = {'learning_rate': tune.loguniform(1e-5, 1e-2),
 match args.loss:
     case 'linex':
         search_space['linex_weight'] = tune.quniform(0.01, 3, 0.005)
-    case 'w_rmse':
-        search_space['w_rmse_weight'] = tune.quniform(1, 10, 0.1)
+    case 'wrmse':
+        search_space['wrmse_weight'] = tune.quniform(1, 10, 0.1)
     case 'linlin':
         search_space['linlin_weight'] = tune.quniform(0.05, 0.45, 0.025)  
 
@@ -60,8 +60,8 @@ def trainable(config):
     match args.loss:
         case 'linex':
             args.linex_weight = config['linex_weight']
-        case 'w_rmse':
-            args.w_rmse_weight = config['w_rmse_weight']
+        case 'wrmse':
+            args.wrmse_weight = config['wrmse_weight']
         case 'linlin':
             args.linlin_weight = config['linlin_weight']
 

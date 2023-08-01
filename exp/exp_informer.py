@@ -131,8 +131,8 @@ class Exp_Informer(Exp_Basic):
         match self.args.loss:
             case 'linex':
                 criterion=LinExLoss(self.args.linex_weight)
-            case 'w_rmse':
-                criterion=WeightedRMSE(self.args.w_rmse_weight)
+            case 'wrmse':
+                criterion=WeightedRMSE(self.args.wrmse_weight)
             case 'rmse':
                 criterion=nn.MSELoss()
             case 'linlin':

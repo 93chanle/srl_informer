@@ -65,8 +65,8 @@ def objective(trial):
     match args.loss:
         case 'linex':
             args.linex_weight = trial.suggest_float('linex_weight', 0.01, 3, step=0.01)
-        case 'w_rmse':
-            args.w_rmse_weight = trial.suggest_float('w_rmse_weight', 1.0, 10.0, step=0.1)
+        case 'wrmse':
+            args.wrmse_weight = trial.suggest_float('wrmse_weight', 1.0, 10.0, step=0.1)
         case 'linlin':
             args.linlin_weight = trial.suggest_float('linlin_weight', 0.05, 0.45, step=0.005)
     

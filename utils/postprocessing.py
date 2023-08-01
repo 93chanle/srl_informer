@@ -67,7 +67,7 @@ class ProcessedResult():
 
         args_dict = self.args.__dict__
 
-        loss_weights = ['linex_weight', 'w_rmse_weight', 'linlin_weight']
+        loss_weights = ['linex_weight', 'wrmse_weight', 'linlin_weight']
 
         if f'{self.args.loss}_weight' in loss_weights:
             for loss_weight in loss_weights:
@@ -102,8 +102,8 @@ class ProcessedResult():
         match self.args.loss:
             case 'linex':
                 result = LinEx(pred, self.true, self.args.linex_weight)
-            case 'w_rmse':
-                result = weighted_RMSE(pred, self.true, self.args.w_rmse_weight)
+            case 'wrmse':
+                result = weighted_RMSE(pred, self.true, self.args.wrmse_weight)
             case 'rmse':
                 result = RMSE(pred, self.true)
             case 'linlin':

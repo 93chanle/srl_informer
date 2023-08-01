@@ -34,9 +34,9 @@ def metric(pred, true):
     
     return mae,mse,rmse,mape,mspe
 
-def weighted_RMSE(pred, true, w_rmse_weight):
+def weighted_RMSE(pred, true, wrmse_weight):
     diff = pred - true
-    weighted_diff = np.where(diff > 0, diff*w_rmse_weight, diff)
+    weighted_diff = np.where(diff > 0, diff*wrmse_weight, diff)
     return np.sqrt((weighted_diff**2).mean()).round(2)
 
 def LinEx(pred, true, linex_weight):
@@ -60,13 +60,13 @@ class WeightedRMSE(nn.Module):
     '''
     alpha: weight parameter to penalize more when pred > true
     '''
-    def __init__(self, w_rmse_weight):
+    def __init__(self, wrmse_weight):
         super(WeightedRMSE, self).__init__()
-        self.w_rmse_weight = w_rmse_weight
+        self.wrmse_weight = wrmse_weight
     
     def forward(self, pred, true):
         diff = pred - true
-        weighted_diff = torch.where(diff > 0, diff*self.w_rmse_weight, diff)
+        weighted_diff = torch.where(diff > 0, diff*self.wrmse_weight, diff)
         return torch.sqrt((weighted_diff**2).mean())
     
 class LinLinLoss(nn.Module):
