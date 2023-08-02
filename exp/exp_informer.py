@@ -165,7 +165,7 @@ class Exp_Informer(Exp_Basic):
         trues = []
         
         for i, (batch_x,batch_y,batch_x_mark,batch_y_mark) in enumerate(vali_loader):
-            pred, true = self._process_one_batch(
+            pred, true, attns = self._process_one_batch(
                 vali_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
             
             loss = criterion(pred.detach().cpu(), true.detach().cpu())
@@ -181,7 +181,7 @@ class Exp_Informer(Exp_Basic):
         trues = np.concatenate(trues, 0)
         
         # Create result object
-        result = ProcessedResult(preds=preds, trues=trues, 
+        result = ProcessedResult(preds=preds, trues=trues, attns=attns,
                                  args=self.args,
                                  data=vali_data)
         predicted_revenue = result.predict_revenue(result.pred)
@@ -472,7 +472,7 @@ class Exp_Informer(Exp_Basic):
                 iter_count += 1
                 
                 model_optim.zero_grad()
-                pred, true = self._process_one_batch(
+                pred, true, attns = self._process_one_batch(
                     train_data, batch_x, batch_y, batch_x_mark, batch_y_mark)
                 loss = criterion(pred, true)
                 

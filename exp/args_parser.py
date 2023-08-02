@@ -7,7 +7,7 @@ import numpy as np
 from datetime import datetime
 
 
-debug = True
+debug = False
 debug_2 = False
 debug_3 = False
 
@@ -21,7 +21,7 @@ def args_parsing():
     parser.add_argument('--data', type=str, required=False, default='SRL_NEG_00_04', help='data')
     parser.add_argument('--model', type=str, required=False, default='informer',help='model of experiment, options: [informer, informerstack, informerlight(TBD)]')
 
-    parser.add_argument('--loss', type=str, default='linlin',help='customized loss functions, one of [wrmse, linex, linlin, rmse]')
+    parser.add_argument('--loss', type=str, default='rmse',help='customized loss functions, one of [wrmse, linex, linlin, rmse]')
 
     parser.add_argument('--wrmse_weight', type=float, default=5,help='weighted parameter for weighted rmse loss function')
     parser.add_argument('--linex_weight', type=float, default=0.05,help='weighted parameter for linear-exponential loss function')
@@ -152,6 +152,7 @@ def args_parsing():
         args.output_attention = True
         args.e_layers = 3
         args.d_layers = 2
+    
         
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
