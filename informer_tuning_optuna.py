@@ -62,6 +62,27 @@ def objective(trial):
     
     # SEARCH SPACE
     
+    # ORIGNAL SEARCH SPACE
+    # match args.loss:
+    #     case 'linex':
+    #         args.linex_weight = trial.suggest_float('linex_weight', 0.01, 3, step=0.01)
+    #     case 'wrmse':
+    #         args.wrmse_weight = trial.suggest_float('wrmse_weight', 1.0, 10.0, step=0.1)
+    #     case 'linlin':
+    #         args.linlin_weight = trial.suggest_float('linlin_weight', 0.05, 0.45, step=0.005)
+    
+    # args.learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
+    # args.train_epochs = trial.suggest_int("train_epochs", 6, 14)
+    # args.seq_len = trial.suggest_int('seq_len', 56, 112, step=7)
+    # label_seq_len_ratio = trial.suggest_float('label_seq_len_ratio', 0.4, 0.8, step=0.025)
+    # args.label_len = min(int(label_seq_len_ratio * args.seq_len), 77)
+    # args.e_layers = trial.suggest_int('e_layers', 2, 7)
+    # args.d_layers = trial.suggest_int('d_layers', 1, 4)
+    # args.n_heads = trial.suggest_int('n_heads', 4, 32, step=4)
+    # args.d_model = trial.suggest_int('d_model', 128, 1024, step=128)
+    # args.batch_size = trial.suggest_int('batch_size', 8, 32, step=8)
+    
+    # REVISED SERACH SPACE
     match args.loss:
         case 'linex':
             args.linex_weight = trial.suggest_float('linex_weight', 0.01, 3, step=0.01)
@@ -80,16 +101,7 @@ def objective(trial):
     args.n_heads = trial.suggest_int('n_heads', 4, 32, step=4)
     args.d_model = trial.suggest_int('d_model', 128, 1024, step=128)
     args.batch_size = trial.suggest_int('batch_size', 8, 32, step=8)
-    
-    # args.n_estimators = trial.suggest_int("n_estimators", 10, 100)
-    # args.max_depth = trial.suggest_int("max_depth", 3, 12)
-    # args.learning_rate = trial.suggest_float("learning_rate", 1e-1, 1e0, log=True)
-    # args.min_child_weight = trial.suggest_int('min_child_weight', 1, 10)
-    # args.gamma = trial.suggest_float('gamma', 0, 1, step=0.1)
-    # args.subsample = trial.suggest_float('subsample', 0.5, 1.0, step=0.1)
-    # args.colsample_bytree = trial.suggest_float('colsample_bytree', 0.5, 1.0, step=0.1)
-    # args.reg_alpha = trial.suggest_loguniform('reg_alpha', 1e-5, 1.0)
-    # args.reg_lambda = trial.suggest_loguniform('reg_lambda', 1e-5, 1.0)
+
 
     exp = Exp(args)
     
