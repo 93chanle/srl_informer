@@ -13,6 +13,7 @@ import torch.nn as nn
 from torch import optim
 from torch.utils.data import DataLoader
 
+import json
 import os
 import time
 import matplotlib.pyplot as plt
@@ -342,6 +343,15 @@ class Exp_Informer(Exp_Basic):
             pkl.dump(result, f)
         
         predicted_revenue = result.predict_revenue(result.pred)
+        
+        # result_dict = dict(
+        #     predicted_revenue=predicted_revenue,
+        #     rmse=rmse
+        # )
+        
+        with open(folder_path+'report.txt', 'w') as file:
+            file.write(f'RMSE={rmse}, predicted_revenue={predicted_revenue}')
+        
         percentile = (result.true - result.pred < 0).mean()
         print(f'[VALI SET] Percentage of overestimation: {percentile}')
         # percentile.append((true - pred < 0).detach().cpu().numpy().mean())
