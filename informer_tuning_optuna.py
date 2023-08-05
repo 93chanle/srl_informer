@@ -136,7 +136,15 @@ study = optuna.create_study(study_name=study_name, storage=storage_name,
                             sampler=optuna.samplers.TPESampler(seed=1993),
                             )
 
-study.optimize(objective, n_trials=args.tune_num_samples, catch=[Exception])
+completes = 0
+
+while completes < 100:
+    
+    study.optimize(objective, n_trials= (args.tune_num_samples - completes), catch=[Exception])
+
+    st_df = study.trials_dataframe()
+    if 'COMPLETE' in st_df['state'].values:
+        completes = (st_df['state'] == 'COMPLETE').sum()
 
 # study = optuna.create_study(
 #     directions=['minimize', 'maximize'],
